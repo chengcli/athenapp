@@ -46,3 +46,8 @@ set(NumTracers 0
 
 # MPI flag
 option(UseMPI "Enable MPI" OFF)
+if (${UseMPI})
+  set(EnableMPI MPI_PARALLEL)
+else()
+  set(EnableMPI NOT_MPI_PARALLEL)
+endif()
