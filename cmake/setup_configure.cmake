@@ -1,5 +1,7 @@
 ## set up configuration for athenapp ##
 
+set(CMAKE_BUILD_TYPE "Debug")
+
 # float point operation precision
 option(SinglePrecision "Enable single precision" OFF)
 
@@ -50,4 +52,16 @@ if (${UseMPI})
   set(EnableMPI MPI_PARALLEL)
 else()
   set(EnableMPI NOT_MPI_PARALLEL)
+endif()
+
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+  if (NOT "DEBUG" IN_LIST BUILD_TYPES)
+    list(APPEND BUILD_TYPES "DEBUG")
+  endif()
+endif()
+
+if (CMAKE_BUILD_TYPE MATCHES "Release")
+  if (NOT "RELEASE" IN_LIST BUILD_TYPES)
+    list(APPEND BUILD_TYPES "RELEASE")
+  endif()
 endif()

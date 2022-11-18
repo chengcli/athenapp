@@ -24,6 +24,9 @@ project(
 set(CMAKE_CXX_STANDARD 14)
 
 # set up model parameters
+message(STATUS "Include ${CMAKE_SOURCE_DIR}/cmake/setup_configure.cmake")
+include(${CMAKE_SOURCE_DIR}/cmake/setup_configure.cmake)
+
 message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_defs.cmake")
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_defs.cmake)
 configure_file(src/defs.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/defs.hpp @ONLY)
@@ -63,8 +66,11 @@ file(GLOB _src_files
   src/utils/*.cpp
   )
 
-# EOS_FILE is delagate to user's seeting
+# EOS_FILE delegates to user
 #list(APPEND _src_files ${EOS_FILE})
+
+# calcualte_fluxes delegates to user
+list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
 
 #include_directories(
 #  ${CMAKE_CURRENT_BINARY_DIR}
