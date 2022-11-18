@@ -78,7 +78,7 @@ list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
 
 foreach(build ${BUILD_TYPES})
   string(TOLOWER ${build} buildl)
-  add_library(athenapp_${buildl} ${_src_files})
+  add_library(athenapp_${buildl} OBJECT ${_src_files})
 
   set_target_properties(athenapp_${buildl}
     PROPERTIES
