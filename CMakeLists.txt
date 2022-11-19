@@ -72,6 +72,9 @@ file(GLOB _src_files
 # calcualte_fluxes delegates to user
 list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
 
+# new_blockdt delegates to user
+list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/new_blockdt\\.cpp$")
+
 #include_directories(
 #  ${CMAKE_CURRENT_BINARY_DIR}
 #  )
