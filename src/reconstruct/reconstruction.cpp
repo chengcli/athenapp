@@ -67,10 +67,10 @@ Reconstruction::Reconstruction(MeshBlock *pmb, ParameterInput *pin) :
     if (input_recon == "4c")
       characteristic_projection = true;
   } else {
-    std::stringstream msg;
+    /*std::stringstream msg;
     msg << "### FATAL ERROR in Reconstruction constructor" << std::endl
         << "xorder=" << input_recon << " not valid choice for reconstruction"<< std::endl;
-    ATHENA_ERROR(msg);
+    ATHENA_ERROR(msg);*/
   }
   // Check for incompatible choices with broader solver configuration
   // --------------------------------
