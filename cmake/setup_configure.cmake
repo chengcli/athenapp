@@ -1,6 +1,8 @@
 ## set up configuration for athenapp ##
 
-set(CMAKE_BUILD_TYPE "Debug")
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
 
 # float point operation precision
 option(SinglePrecision "Enable single precision" OFF)
