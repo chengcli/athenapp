@@ -155,6 +155,7 @@ class EquationOfState {
 #else // not GENERAL_EOS
   Real GetGamma() const {return gamma_;}
 #endif
+  Real getGamma() const {return GetGamma();}
   EquationOfState* use(Thermodynamics *);
 
  private:
