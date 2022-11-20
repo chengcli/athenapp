@@ -16,11 +16,7 @@ set(EQUATION_OF_STATE "adiabatic")
 
 set(GENERAL_EOS_FILE noop.cpp)
 
-#if (${EquationOfState} STREQUAL "adiabatic_hydro")
-#  set(EOS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/eos/${EquationOfState}.cpp)
-#else()
-#  set(EOS_FILE ${CMAKE_SOURCE_DIR}/src/eos/${EquationOfState}.cpp)
-#endif()
+set(EOS_FILE ${EquationOfState}.cpp)
 
 set(RSOLVER_FILE ${RiemannSolver}.cpp)
 

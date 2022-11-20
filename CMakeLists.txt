@@ -44,6 +44,7 @@ file(GLOB _src_files
   src/bvals/utils/*.cpp
   src/coordinates/*.cpp
   src/eos/general/${GENERAL_EOS_FILE}
+  src/eos/${EOS_FILE}
   src/eos/eos_high_order.cpp
   src/eos/eos_scalars.cpp
   src/fft/*.cpp
@@ -53,13 +54,13 @@ file(GLOB _src_files
   src/hydro/*.cpp
   src/hydro/srcterms/*.cpp
   src/hydro/hydro_diffusion/*.cpp
-	src/hydro/rsolvers/hydro/${RSOLVER_FILE}
+  src/hydro/rsolvers/hydro/${RSOLVER_FILE}
   src/inputs/*.cpp
   src/mesh/*.cpp
   src/multigrid/*.cpp
   src/orbital_advection/*.cpp
   src/outputs/*.cpp
-  #src/pgen/default_pgen.cpp
+  src/pgen/default_pgen.cpp
   src/reconstruct/*.cpp
   src/scalars/*.cpp
   src/task_list/*.cpp
@@ -74,6 +75,9 @@ list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
 
 # new_blockdt delegates to user
 list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/new_blockdt\\.cpp$")
+
+# outputs delegates to user
+list(FILTER _src_files EXCLUDE REGEX ".*/src/outputs/outputs\\.cpp$")
 
 #include_directories(
 #  ${CMAKE_CURRENT_BINARY_DIR}
