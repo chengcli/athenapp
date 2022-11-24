@@ -71,13 +71,19 @@ file(GLOB _src_files
 #list(APPEND _src_files ${EOS_FILE})
 
 # calcualte_fluxes delegates to user
-list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
+if (EXISTS "${CMAKE_SOURCE_DIR}/src/hydro/calculate_fluxes.cpp")
+  list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
+endif()
 
 # new_blockdt delegates to user
-list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/new_blockdt\\.cpp$")
+if (EXISTS "${CMAKE_SOURCE_DIR}/src/hydro/new_blockdt.cpp")
+  list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/new_blockdt\\.cpp$")
+endif()
 
 # outputs delegates to user
-list(FILTER _src_files EXCLUDE REGEX ".*/src/outputs/outputs\\.cpp$")
+if (EXISTS "${CMAKE_SOURCE_DIR}/src/outputs/outputs.cpp")
+  list(FILTER _src_files EXCLUDE REGEX ".*/src/outputs/outputs\\.cpp$")
+endif()
 
 #include_directories(
 #  ${CMAKE_CURRENT_BINARY_DIR}
