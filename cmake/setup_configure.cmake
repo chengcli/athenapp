@@ -8,7 +8,7 @@ endif()
 option(SinglePrecision "Enable single precision" OFF)
 
 # equation of state
-set(EquationOfState ideal_moist_hydro
+set(EquationOfState adiabatic_hydro
   CACHE STRING "Choose the equation of state for primitive-conserved conversion")
 set_property(CACHE EquationOfState
   PROPERTY STRINGS
