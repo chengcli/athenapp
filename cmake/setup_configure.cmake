@@ -51,9 +51,16 @@ set(NumTracers 0
 # MPI flag
 option(UseMPI "Enable MPI" OFF)
 if (${UseMPI})
-  set(EnableMPI MPI_PARALLEL)
+  set(MPIOption MPI_PARALLEL)
 else()
-  set(EnableMPI NOT_MPI_PARALLEL)
+  set(MPIOption NOT_MPI_PARALLEL)
+endif()
+
+# CubedSphere flag
+if (${UseCubedSphere})
+  set(CubedSphereOption CUBED_SPHERE)
+else()
+  set(CubedSphereOption NOT_CUBED_SPHERE)
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")

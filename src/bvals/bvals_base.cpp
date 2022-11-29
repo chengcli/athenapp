@@ -25,6 +25,7 @@
 #include "../mesh/mesh.hpp"
 #include "../utils/buffer_utils.hpp"
 #include "bvals.hpp"
+#include "cubed_sphere.hpp"
 
 // required definitions of static data members of BoundaryBase outside class definition
 // (zero-initialization is performed for all static storage duration variables)
@@ -367,8 +368,18 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
   if (block_size_.nx2 == 1) return;
 
   // x2 face
+  // variables for the cubed sphere implementation right now we only care about 
+  // the same level
+  int tmp_ox1, tmp_ox2, tmp_tox1, tmp_tox2;
   for (int n=-1; n<=1; n+=2) {
+#ifdef CUBED_SPHERE
+    tmp_ox1 = 0;
+    tmp_ox2 = n;
+    TransformOxForCubedSphere(&tmp_ox1, &tmp_ox2, &tmp_tox1, &tmp_tox2, loc);
+    neibt = tree.FindNeighbor(loc, tmp_ox1, tmp_ox2, 0);
+#else
     neibt = tree.FindNeighbor(loc, 0, n, 0);
+#endif
     if (neibt == nullptr) { bufid += nf1*nf2; continue;}
     if (neibt->pleaf_ != nullptr) { // neighbor at finer level
       int fface = 1 - (n + 1)/2; // 0 for BoundaryFace::outer_x2, 1 for inner_x2
@@ -378,7 +389,11 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
           MeshBlockTree* nf = neibt->GetLeaf(f1, fface, f2);
           int fid = nf->gid_;
           int nlevel = nf->loc_.level;
+#ifdef CUBED_SPHERE
+          int tbid = FindBufferID(tmp_tox1, tmp_tox2, 0, 0, 0);
+#else
           int tbid = FindBufferID(0, -n, 0, 0, 0);
+#endif
           neighbor[nneighbor].SetNeighbor(
               ranklist[fid], nlevel, fid, fid-nslist[ranklist[fid]], 0, n, 0,
               NeighborConnect::face, bufid, tbid, false, false, f1, f2);
@@ -396,9 +411,17 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
             || (n == 1 && block_bcs[BoundaryFace::outer_x2] == BoundaryFlag::polar)) {
           polar = true; // neighbor is across top or bottom pole
         }
+#ifdef CUBED_SPHERE
+        tbid = FindBufferID(tmp_tox1, tmp_tox2, 0, 0, 0);
+#else
         tbid = FindBufferID(0, polar ? n : -n, 0, 0, 0);
+#endif
       } else { // neighbor at coarser level
+#ifdef CUBED_SPHERE
+        tbid = FindBufferID(tmp_tox1, tmp_tox2, 0, myfx2, myfx3);
+#else
         tbid = FindBufferID(0, -n, 0, myfx1, myfx3);
+#endif
       }
       neighbor[nneighbor].SetNeighbor(
           ranklist[nid], nlevel, nid, nid-nslist[ranklist[nid]], 0, n, 0,

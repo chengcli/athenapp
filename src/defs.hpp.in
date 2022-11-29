@@ -90,6 +90,9 @@
 #define COMPILER_COMMAND "@COMPILER_COMMAND@"
 #define COMPILED_WITH_OPTIONS "@COMPILER_FLAGS@" // NOLINT
 
+// CubedSphere option
+#define @CUBED_SPHERE_OPTION@
+
 //----------------------------------------------------------------------------------------
 // macros associated with numerical algorithm (rarely modified)
 
