@@ -493,16 +493,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
   // x1x2 edge
   for (int m=-1; m<=1; m+=2) {
     for (int n=-1; n<=1; n+=2) {
-#ifdef CUBED_SPHERE
-    int tmp_ox2, tmp_ox3, tmp_tox2, tmp_tox3;
-    tmp_ox2 = m;
-    tmp_ox3 = 0;
-    TransformOxForCubedSphere(&tmp_ox2, &tmp_ox3, &tmp_tox2, &tmp_tox3, loc);
-    neibt = tree.FindNeighbor(loc, n, tmp_ox2, tmp_ox3);
-#else
-    neibt=tree.FindNeighbor(loc, n, m, 0);
-#endif
-      
+      neibt=tree.FindNeighbor(loc, n, m, 0);      
       if (neibt == nullptr) { bufid += nf2; continue;}
       bool polar = false;
       if ((m == -1 && block_bcs[BoundaryFace::inner_x2] == BoundaryFlag::polar)
@@ -520,11 +511,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
           MeshBlockTree* nf = neibt->GetLeaf(ff1, ff2, f1);
           int fid = nf->gid_;
           int nlevel = nf->loc_.level;
-#ifdef CUBED_SPHERE
-    int tbid = FindBufferID(-n, tmp_tox2, tmp_tox3, 0, 0);
-#else
-    int tbid = FindBufferID(-n, polar ? m : -m, 0, 0, 0);
-#endif
+          int tbid = FindBufferID(-n, polar ? m : -m, 0, 0, 0);
           neighbor[nneighbor].SetNeighbor(ranklist[fid], nlevel, fid,
                                           fid-nslist[ranklist[fid]], n, m, 0,
                                           NeighborConnect::edge, bufid, tbid, polar,
@@ -544,17 +531,9 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
                   && block_bcs[BoundaryFace::outer_x1] == BoundaryFlag::shear_periodic)) {
             shear = true; // neighbor is on shearing periodic bcs
           }
-#ifdef CUBED_SPHERE
-    tbid = FindBufferID(-n, tmp_tox2, tmp_tox3, 0, 0);
-#else
-    tbid = FindBufferID(-n, polar ? m : -m, 0, 0, 0);
-#endif
+        tbid = FindBufferID(-n, polar ? m : -m, 0, 0, 0);
         } else { // neighbor at coarser level
-#ifdef CUBED_SPHERE
-    tbid = FindBufferID(-n, tmp_tox2, tmp_tox3, myfx3, 0);
-#else
-    tbid = FindBufferID(-n, polar ? m : -m, 0, myfx3, 0);
-#endif
+        tbid = FindBufferID(-n, polar ? m : -m, 0, myfx3, 0);
         }
         if (nlevel >= loc.level || (myox1 == n && myox2 == m)) {
           neighbor[nneighbor].SetNeighbor(
@@ -665,15 +644,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
   // x1x3 edge
   for (int m=-1; m<=1; m+=2) {
     for (int n=-1; n<=1; n+=2) {
-#ifdef CUBED_SPHERE
-    int tmp_ox2, tmp_ox3, tmp_tox2, tmp_tox3;
-    tmp_ox2 = 0;
-    tmp_ox3 = m;
-    TransformOxForCubedSphere(&tmp_ox2, &tmp_ox3, &tmp_tox2, &tmp_tox3, loc);
-    neibt = tree.FindNeighbor(loc, n, tmp_ox2, tmp_ox3);
-#else
-    neibt=tree.FindNeighbor(loc, n, 0, m);
-#endif
+      neibt=tree.FindNeighbor(loc, n, 0, m);
       if (neibt == nullptr) { bufid += nf1; continue;}
       if (neibt->pleaf_ != nullptr) { // neighbor at finer level
         int ff1 = 1 - (n + 1)/2; // 0 for BoundaryFace::outer_x1, 1 for inner_x1
@@ -683,11 +654,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
           MeshBlockTree* nf = neibt->GetLeaf(ff1, f1, ff2);
           int fid = nf->gid_;
           int nlevel = nf->loc_.level;
-#ifdef CUBED_SPHERE
-    int tbid = FindBufferID(-n, tmp_tox2, tmp_tox3, 0, 0);
-#else
-    int tbid = FindBufferID(-n, 0, -m, 0, 0);
-#endif
+          int tbid = FindBufferID(-n, 0, -m, 0, 0);
           neighbor[nneighbor].SetNeighbor(ranklist[fid], nlevel, fid,
                                           fid-nslist[ranklist[fid]], n, 0, m,
                                           NeighborConnect::edge, bufid, tbid,
@@ -701,11 +668,8 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
         int tbid;
         bool shear = false;
         if (nlevel == loc.level) { // neighbor at same level
-#ifdef CUBED_SPHERE
-    tbid = FindBufferID(-n, tmp_tox2, tmp_tox3, 0, 0);
-#else
-    tbid = FindBufferID(-n, 0, -m, 0, 0);
-#endif
+
+        tbid = FindBufferID(-n, 0, -m, 0, 0);
           if ((n == -1
                && block_bcs[BoundaryFace::inner_x1] == BoundaryFlag::shear_periodic)
               || (n == 1
@@ -713,11 +677,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
             shear = true; //neighbor is on shearing periodic boundary
           }
         } else { // neighbor at coarser level
-#ifdef CUBED_SPHERE
-    tbid = FindBufferID(-n, tmp_tox2, tmp_tox3, myfx2, 0);
-#else
-    tbid = FindBufferID(-n, 0, -m, myfx2, 0);
-#endif
+        tbid = FindBufferID(-n, 0, -m, myfx2, 0);
           tbid = FindBufferID(-n, 0, -m, myfx2, 0);
         }
         if (nlevel >= loc.level || (myox1 == n && myox3 == m)) {
