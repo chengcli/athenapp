@@ -19,7 +19,7 @@
 #include "../mesh/mesh.hpp"
 #include "../parameter_input.hpp"
 #include "coordinates.hpp"
-#include "../bvals/cubed_sphere.hpp"
+#include "../cubed_sphere.hpp"
 
 
 //----------------------------------------------------------------------------------------
