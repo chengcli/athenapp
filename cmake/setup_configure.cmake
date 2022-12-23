@@ -47,7 +47,7 @@ set(NumScalars 0
   CACHE STRING "Set number of fluid tracers")
 
 # MPI flag
-option(UseMPI "Enable MPI" OFF)
+#option(UseMPI "Enable MPI" OFF)
 if (${UseMPI})
   set(MPIOption MPI_PARALLEL)
 else()

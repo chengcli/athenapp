@@ -3,6 +3,8 @@
 #include "athena.hpp"
 #include "coordinates/coordinates.hpp"
 
+int FindBlockID(LogicalLocation const& loc);
+
 void TransformOxForCubedSphere(int *ox2, int *ox3, int *tox2, int *tox3,
   LogicalLocation const& loc);
 
