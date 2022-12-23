@@ -50,6 +50,7 @@ set(NumScalars 0
 # MPI flag
 #option(UseMPI "Enable MPI" OFF)
 if (${UseMPI})
+  find_package(MPI REQUIRED)
   set(MPIOption MPI_PARALLEL)
 else()
   set(MPIOption NOT_MPI_PARALLEL)
