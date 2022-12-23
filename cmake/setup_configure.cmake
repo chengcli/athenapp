@@ -43,9 +43,7 @@ set(GhostZoneSize 3
 # array size
 set(NumVapors 0
   CACHE STRING "Set number of vapors in the equation of state")
-set(NumClouds 0
-  CACHE STRING "Set number of clouds")
-set(NumTracers 0
+set(NumScalars 0
   CACHE STRING "Set number of fluid tracers")
 
 # MPI flag
