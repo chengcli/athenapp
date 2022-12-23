@@ -50,9 +50,17 @@ set(H5_DOUBLE_PRECISION_ENABLED 0)
 
 set(FFT_OPTION NO_FFT)
 
-set(MPI_OPTION ${MPIOption})
+if (${MPIOption})
+  set(MPI_OPTION ${MPIOption})
+else()
+  set(MPI_OPTION NOT_MPI_PARALLEL)
+endif()
 
-set(CUBED_SPHERE_OPTION ${CubedSphereOption})
+if (${CubedSphereOption})
+  set(CUBED_SPHERE_OPTION ${CubedSphereOption})
+else()
+  set(CUBED_SPHERE_OPTION NOT_CUBED_SPHERE)
+endif()
 
 set(OPENMP_OPTION NOT_OPENMP_PARALLEL)
 
@@ -63,13 +71,22 @@ set(DEBUG_OPTION NOT_DEBUG)
 #set(EXCEPTION_HANDLING_OPTION DISABLE_EXCEPTIONS)
 set(EXCEPTION_HANDLING_OPTION ENABLE_EXCEPTIONS)
 
-math(EXPR NHYDRO_VARIABLES "5 + ${NumVapors}")
-set(NVAPOR_VARIABLES ${NumVapors})
+if (${NumVapors})
+  math(EXPR NHYDRO_VARIABLES "5 + ${NumVapors}")
+  set(NVAPOR_VARIABLES ${NumVapors})
+else()
+  set(NHYDRO_VARIABLES 5)
+  set(NVAPOR_VARIABLES 0)
+endif()
 
 set(NFIELD_VARIABLES 0)
 
 set(NWAVE_VALUE ${NHYDRO_VARIABLES})
 
-set(NUMBER_PASSIVE_SCALARS ${NumTracers})
+if (${NumScalars})
+  set(NUMBER_PASSIVE_SCALARS ${NumScalars})
+else()
+  set(NUMBER_PASSIVE_SCALARS 0)
+endif()
 
 set(NUMBER_GHOST_CELLS ${GhostZoneSize})
