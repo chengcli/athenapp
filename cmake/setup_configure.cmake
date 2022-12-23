@@ -30,6 +30,7 @@ set_property(CACHE CoordinateSystem
   schwarzschild
   kerr-schild
   gr_user
+  gnomonic_equiangle
   )
 
 # hydro flux solver
@@ -57,6 +58,7 @@ endif()
 # CubedSphere flag
 if (${UseCubedSphere})
   set(CubedSphereOption CUBED_SPHERE)
+  set(CoordinateSystem gnomonic_equiangle)
 else()
   set(CubedSphereOption NOT_CUBED_SPHERE)
 endif()
