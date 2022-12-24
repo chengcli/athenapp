@@ -21,9 +21,12 @@ project(
   LANGUAGES CXX
   )
 set(CMAKE_CXX_STANDARD 14)
+message(STATUS "")
 message(STATUS "== Setting up athenapp library ==")
 
 # set up model parameters
+## 1. set up project configuration ##
+message(STATUS "1. Set up project configuration flags ...")
 message(STATUS "Include ${CMAKE_SOURCE_DIR}/cmake/setup_configure.cmake")
 include(${CMAKE_SOURCE_DIR}/cmake/setup_configure.cmake)
 

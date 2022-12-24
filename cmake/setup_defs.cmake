@@ -50,13 +50,13 @@ set(H5_DOUBLE_PRECISION_ENABLED 0)
 
 set(FFT_OPTION NO_FFT)
 
-if (${MPIOption})
+if (DEFINED MPIOption)
   set(MPI_OPTION ${MPIOption})
 else()
   set(MPI_OPTION NOT_MPI_PARALLEL)
 endif()
 
-if (${CubedSphereOption})
+if (DEFINED CubedSphereOption)
   set(CUBED_SPHERE_OPTION ${CubedSphereOption})
 else()
   set(CUBED_SPHERE_OPTION NOT_CUBED_SPHERE)
@@ -71,7 +71,7 @@ set(DEBUG_OPTION NOT_DEBUG)
 #set(EXCEPTION_HANDLING_OPTION DISABLE_EXCEPTIONS)
 set(EXCEPTION_HANDLING_OPTION ENABLE_EXCEPTIONS)
 
-if (${NumVapors})
+if (DEFINED NumVapors)
   math(EXPR NHYDRO_VARIABLES "5 + ${NumVapors}")
   set(NVAPOR_VARIABLES ${NumVapors})
 else()
@@ -83,7 +83,7 @@ set(NFIELD_VARIABLES 0)
 
 set(NWAVE_VALUE ${NHYDRO_VARIABLES})
 
-if (${NumScalars})
+if (DEFINED NumScalars)
   set(NUMBER_PASSIVE_SCALARS ${NumScalars})
 else()
   set(NUMBER_PASSIVE_SCALARS 0)
