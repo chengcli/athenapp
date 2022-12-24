@@ -52,6 +52,8 @@ class Hydro {
 
 #ifdef CUBED_SPHERE
   AthenaArray<Real> L3DValues[3], R3DValues[3];
+  MPI_Request send_request[4];
+  MPI_Request recv_request[4];
 #endif
 
   // storage for SMR/AMR
@@ -100,7 +102,8 @@ class Hydro {
   void LoadLR3DValues(AthenaArray<Real> &L_in, AthenaArray<Real> &R_in,
     int direction, int k, int j, int il, int iu);
 
-  void SynchronizeFluxes();
+  void SynchronizeFluxesSend();
+  void SynchronizeFluxesRecv();
   void SendNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
   void RecvNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
 #endif
