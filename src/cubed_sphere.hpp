@@ -20,6 +20,7 @@ public:
   GnomonicEquiangle(MeshBlock *pmb, ParameterInput *pin, bool flag);
 };
 
+
 class CubedSphereLR{
   public:
     void SetMeshBlock(MeshBlock *pmb_in);
