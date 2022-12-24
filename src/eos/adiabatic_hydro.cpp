@@ -63,9 +63,15 @@ void EquationOfState::ConservedToPrimitive(
         w_d = u_d;
 
         Real di = 1.0/u_d;
+#ifdef CUBED_SPHERE
+        w_vx = u_m1;
+        w_vy = u_m2;
+        w_vz = u_m3;
+#else
         w_vx = u_m1*di;
         w_vy = u_m2*di;
         w_vz = u_m3*di;
+#endif
 
         Real e_k = 0.5*di*(SQR(u_m1) + SQR(u_m2) + SQR(u_m3));
         w_p = gm1*(u_e - e_k);
@@ -108,9 +114,15 @@ void EquationOfState::PrimitiveToConserved(
         const Real& w_p  = prim(IPR,k,j,i);
 
         u_d = w_d;
+#ifdef CUBED_SPHERE
+        u_m1 = w_vx;
+        u_m2 = w_vy;
+        u_m3 = w_vz;
+#else
         u_m1 = w_vx*w_d;
         u_m2 = w_vy*w_d;
         u_m3 = w_vz*w_d;
+#endif
         u_e = w_p*igm1 + 0.5*w_d*(SQR(w_vx) + SQR(w_vy) + SQR(w_vz));
       }
     }
