@@ -14,7 +14,7 @@ void PackDataCubedSphere(const AthenaArray<Real> &src, Real *buf,
 
 void ProjectLocalCartesianAffine(const AthenaArray<Real> &src, 
         AthenaArray<Real> &tgt, Real affine_angle, int sn, int en, int si, int ei, int sj, 
-        int ej, int sk, int ek);
+        int ej, int sk, int ek, int Dir);
 
 Real CubedSphereMeshGeneratorX2(Real x, LogicalLocation const& loc);
 Real CubedSphereMeshGeneratorX3(Real x, LogicalLocation const& loc);
