@@ -20,6 +20,10 @@ public:
   GnomonicEquiangle(MeshBlock *pmb, ParameterInput *pin, bool flag);
 };
 
+class AffineCoordinate : public Coordinates {
+public:
+  AffineCoordinate(MeshBlock *pmb, ParameterInput *pin, bool flag);
+};
 
 class CubedSphereLR{
   public:
