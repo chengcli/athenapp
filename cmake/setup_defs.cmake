@@ -26,7 +26,11 @@ set(GENERAL_EOS 0)
 
 set(EOS_TABLE_ENABLED 0)
 
-set(NON_BAROTROPIC_EOS 1)
+if (Barotropic)
+  set(NON_BAROTROPIC_EOS 0)
+else()
+  set(NON_BAROTROPIC_EOS 1)
+endif()
 
 set(MAGNETIC_FIELDS_ENABLED 0)
 
@@ -78,10 +82,18 @@ set(DEBUG_OPTION NOT_DEBUG)
 set(EXCEPTION_HANDLING_OPTION ENABLE_EXCEPTIONS)
 
 if (DEFINED NumVapors)
-  math(EXPR NHYDRO_VARIABLES "5 + ${NumVapors}")
+  if (Barotropic)
+    math(EXPR NHYDRO_VARIABLES "4 + ${NumVapors}")
+  else()
+    math(EXPR NHYDRO_VARIABLES "5 + ${NumVapors}")
+  endif()
   set(NVAPOR_VARIABLES ${NumVapors})
 else()
-  set(NHYDRO_VARIABLES 5)
+  if (Barotropic)
+    set(NHYDRO_VARIABLES 4)
+  else()
+    set(NHYDRO_VARIABLES 5)
+  endif()
   set(NVAPOR_VARIABLES 0)
 endif()
 
