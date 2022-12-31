@@ -10,13 +10,13 @@ set(COORDINATE_SYSTEM "${CoordinateSystem}")
 
 set(RSOLVER "${RiemannSolver}")
 
-set(EQUATION_OF_STATE "adiabatic")
+set(EQUATION_OF_STATE ${EquationOfState})
 
 # specific compile files
 
 set(GENERAL_EOS_FILE noop.cpp)
 
-set(EOS_FILE ${EquationOfState}.cpp)
+set(EOS_FILE ${EquationOfState}_hydro.cpp)
 
 set(RSOLVER_FILE ${RiemannSolver}.cpp)
 
@@ -62,6 +62,12 @@ else()
   set(CUBED_SPHERE_OPTION NOT_CUBED_SPHERE)
 endif()
 
+if (Hydrostatic)
+  set(HYDROSTATIC_OPTION HYDROSTATIC)
+else()
+  set(HYDROSTATIC_OPTION NOT_HYDROSTATIC)
+endif()
+
 set(OPENMP_OPTION NOT_OPENMP_PARALLEL)
 
 set(HDF5_OPTION NO_NDF5OUTPUT_PARALLEL)
@@ -89,4 +95,14 @@ else()
   set(NUMBER_PASSIVE_SCALARS 0)
 endif()
 
-set(NUMBER_GHOST_CELLS ${GhostZoneSize})
+if (DEFINED GhostZoneSize)
+  set(NUMBER_GHOST_CELLS ${GhostZoneSize})
+else()
+  set(NUMBER_GHOST_CELLS 2)
+endif()
+
+set(COMPILED_WITH ${CMAKE_CXX_COMPILER_ID})
+
+set(COMPILER_COMMAND ${CMAKE_CXX_COMPILER})
+
+set(COMPILED_WITH_OPTIONS ${CMAKE_CXX_FLAGS_RELEASE})

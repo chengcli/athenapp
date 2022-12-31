@@ -93,6 +93,9 @@
 // CubedSphere option
 #define @CUBED_SPHERE_OPTION@
 
+// Hydrostatic option
+#define @HYDROSTATIC_OPTION@
+
 //----------------------------------------------------------------------------------------
 // macros associated with numerical algorithm (rarely modified)
 
