@@ -12,6 +12,13 @@ void PackDataCubedSphere(const AthenaArray<Real> &src, Real *buf,
          int sn, int en, int si, int ei, int sj, int ej, int sk, int ek, int &offset,
          int ox1, int ox2, int ox3,LogicalLocation const& loc);
 
+void ProjectLocalCartesianAffine(const AthenaArray<Real> &src, 
+        AthenaArray<Real> &tgt, Real affine_angle, int sn, int en, int si, int ei, int sj, 
+        int ej, int sk, int ek, int Dir);
+
+void DeProjectLocalCartesianAffine(AthenaArray<Real> &flux, 
+        Real affine_angle, int sn, int en, int si, int ei, int sj, int ej, int sk, int ek, int Dir);
+
 Real CubedSphereMeshGeneratorX2(Real x, LogicalLocation const& loc);
 Real CubedSphereMeshGeneratorX3(Real x, LogicalLocation const& loc);
 
@@ -20,6 +27,10 @@ public:
   GnomonicEquiangle(MeshBlock *pmb, ParameterInput *pin, bool flag);
 };
 
+class AffineCoordinate : public Coordinates {
+public:
+  AffineCoordinate(MeshBlock *pmb, ParameterInput *pin, bool flag);
+};
 
 class CubedSphereLR{
   public:
