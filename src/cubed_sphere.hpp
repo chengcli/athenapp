@@ -30,6 +30,20 @@ public:
 class AffineCoordinate : public Coordinates {
 public:
   AffineCoordinate(MeshBlock *pmb, ParameterInput *pin, bool flag);
+
+  // ...to compute area of faces
+  void Face1Area(const int k, const int j, const int il, const int iu,
+                 AthenaArray<Real> &area) final;
+  void Face2Area(const int k, const int j, const int il, const int iu,
+                 AthenaArray<Real> &area) final;
+  Real GetFace1Area(const int k, const int j, const int i) final;
+  Real GetFace2Area(const int k, const int j, const int i) final;
+  // ...to compute area of faces joined by cell centers (for non-ideal MHD)
+  void VolCenterFace1Area(const int k, const int j, const int il, const int iu,
+                          AthenaArray<Real> &area) final;
+  void VolCenterFace2Area(const int k, const int j, const int il, const int iu,
+                          AthenaArray<Real> &area) final;
+
 };
 
 class CubedSphereLR{
