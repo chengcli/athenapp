@@ -31,6 +31,7 @@ set_property(CACHE CoordinateSystem
   kerr-schild
   gr_user
   gnomonic_equiangle
+  affine_coordinates
   )
 
 # hydro flux solver
