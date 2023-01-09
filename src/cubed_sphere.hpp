@@ -52,6 +52,18 @@ public:
                           AthenaArray<Real> &vol);
   Real GetCellVolume(const int k, const int j, const int i);
 
+  void CellMetric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+  void Face1Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+  void Face2Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+  void Face3Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+
+  void PrimToLocal1(const int k, const int j, const int il, const int iu, AthenaArray<Real> &prim_l, AthenaArray<Real> &prim_r);
+  void PrimToLocal2(const int k, const int j, const int il, const int iu, AthenaArray<Real> &prim_l, AthenaArray<Real> &prim_r);
+  void PrimToLocal3(const int k, const int j, const int il, const int iu, AthenaArray<Real> &prim_l, AthenaArray<Real> &prim_r);
+
+  void FluxToGlobal1(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
+  void FluxToGlobal2(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
+  void FluxToGlobal3(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
 };
 
 class CubedSphereLR{

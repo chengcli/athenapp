@@ -35,7 +35,7 @@ set_property(CACHE CoordinateSystem
   )
 
 # hydro flux solver
-set(RiemannSolver hllc
+set(RiemannSolver hllc_transform
   CACHE STRING "Choose the Riemann Solver")
 
 # ghost zone size
