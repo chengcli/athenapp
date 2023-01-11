@@ -64,6 +64,11 @@ public:
   void FluxToGlobal1(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
   void FluxToGlobal2(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
   void FluxToGlobal3(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
+
+protected:
+  Real theta_;
+  Real sin_theta_;
+  Real cos_theta_;
 };
 
 class CubedSphereLR{
