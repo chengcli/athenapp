@@ -57,14 +57,24 @@ public:
   void Face2Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
   void Face3Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
 
-  void PrimToLocal1(const int k, const int j, const int il, const int iu, AthenaArray<Real> &prim_l, AthenaArray<Real> &prim_r);
-  void PrimToLocal2(const int k, const int j, const int il, const int iu, AthenaArray<Real> &prim_l, AthenaArray<Real> &prim_r);
-  void PrimToLocal3(const int k, const int j, const int il, const int iu, AthenaArray<Real> &prim_l, AthenaArray<Real> &prim_r);
 
-  void FluxToGlobal1(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
-  void FluxToGlobal2(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
-  void FluxToGlobal3(const int k, const int j, const int il, const int iu, AthenaArray<Real> &flux);
+  void PrimToLocal2(
+        const int k, const int j, const int il, const int iu,
+        const AthenaArray<Real> &b1_vals, AthenaArray<Real> &prim_left,
+        AthenaArray<Real> &prim_right, AthenaArray<Real> &bx);
+  void PrimToLocal3(
+        const int k, const int j, const int il, const int iu,
+        const AthenaArray<Real> &b1_vals, AthenaArray<Real> &prim_left,
+        AthenaArray<Real> &prim_right, AthenaArray<Real> &bx);
 
+  void FluxToGlobal2(
+        const int k, const int j, const int il, const int iu,
+        const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
+        AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
+  void FluxToGlobal3(
+        const int k, const int j, const int il, const int iu,
+        const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
+        AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
 protected:
   Real theta_;
   Real sin_theta_;
