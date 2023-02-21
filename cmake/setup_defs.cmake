@@ -10,13 +10,13 @@ set(COORDINATE_SYSTEM "${CoordinateSystem}")
 
 set(RSOLVER "${RiemannSolver}")
 
-set(EQUATION_OF_STATE "adiabatic")
+set(EQUATION_OF_STATE ${EquationOfState})
 
 # specific compile files
 
 set(GENERAL_EOS_FILE noop.cpp)
 
-set(EOS_FILE ${EquationOfState}.cpp)
+set(EOS_FILE ${EquationOfState}_hydro.cpp)
 
 set(RSOLVER_FILE ${RiemannSolver}.cpp)
 
@@ -26,7 +26,11 @@ set(GENERAL_EOS 0)
 
 set(EOS_TABLE_ENABLED 0)
 
-set(NON_BAROTROPIC_EOS 1)
+if (Barotropic)
+  set(NON_BAROTROPIC_EOS 0)
+else()
+  set(NON_BAROTROPIC_EOS 1)
+endif()
 
 set(MAGNETIC_FIELDS_ENABLED 0)
 
@@ -62,6 +66,18 @@ else()
   set(CUBED_SPHERE_OPTION NOT_CUBED_SPHERE)
 endif()
 
+if (DEFINED AffineOption)
+  set(AFFINE_OPTION ${AffineOption})
+else()
+  set(AFFINE_OPTION NOT_AFFINE)
+endif()
+
+if (DEFINED HydrostaticOption)
+  set(HYDROSTATIC_OPTION ${HydrostaticOption})
+else()
+  set(HYDROSTATIC_OPTION NOT_HYDROSTATIC)
+endif()
+
 set(OPENMP_OPTION NOT_OPENMP_PARALLEL)
 
 set(HDF5_OPTION NO_NDF5OUTPUT_PARALLEL)
@@ -72,10 +88,18 @@ set(DEBUG_OPTION NOT_DEBUG)
 set(EXCEPTION_HANDLING_OPTION ENABLE_EXCEPTIONS)
 
 if (DEFINED NumVapors)
-  math(EXPR NHYDRO_VARIABLES "5 + ${NumVapors}")
+  if (Barotropic)
+    math(EXPR NHYDRO_VARIABLES "4 + ${NumVapors}")
+  else()
+    math(EXPR NHYDRO_VARIABLES "5 + ${NumVapors}")
+  endif()
   set(NVAPOR_VARIABLES ${NumVapors})
 else()
-  set(NHYDRO_VARIABLES 5)
+  if (Barotropic)
+    set(NHYDRO_VARIABLES 4)
+  else()
+    set(NHYDRO_VARIABLES 5)
+  endif()
   set(NVAPOR_VARIABLES 0)
 endif()
 
@@ -89,4 +113,14 @@ else()
   set(NUMBER_PASSIVE_SCALARS 0)
 endif()
 
-set(NUMBER_GHOST_CELLS ${GhostZoneSize})
+if (DEFINED GhostZoneSize)
+  set(NUMBER_GHOST_CELLS ${GhostZoneSize})
+else()
+  set(NUMBER_GHOST_CELLS 2)
+endif()
+
+set(COMPILED_WITH ${CMAKE_CXX_COMPILER_ID})
+
+set(COMPILER_COMMAND ${CMAKE_CXX_COMPILER})
+
+set(COMPILED_WITH_OPTIONS ${CMAKE_CXX_FLAGS_RELEASE})

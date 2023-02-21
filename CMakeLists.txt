@@ -84,7 +84,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/src/hydro/new_blockdt.cpp")
 endif()
 
 # outputs delegates to user
-if (EXISTS "${CMAKE_SOURCE_DIR}/src/outputs/outputs.cpp")
+if (EXISTS "${CMAKE_SOURCE_DIR}/cliutils")
   list(FILTER _src_files EXCLUDE REGEX ".*/src/outputs/outputs\\.cpp$")
 endif()
 

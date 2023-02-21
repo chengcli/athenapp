@@ -31,10 +31,11 @@ set_property(CACHE CoordinateSystem
   kerr-schild
   gr_user
   gnomonic_equiangle
+  affine_coordinates
   )
 
 # hydro flux solver
-set(RiemannSolver hllc
+set(RiemannSolver hllc_transform
   CACHE STRING "Choose the Riemann Solver")
 
 # ghost zone size
