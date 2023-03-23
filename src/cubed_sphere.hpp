@@ -22,14 +22,49 @@ void DeProjectLocalCartesianAffine(AthenaArray<Real> &flux,
 Real CubedSphereMeshGeneratorX2(Real x, LogicalLocation const& loc);
 Real CubedSphereMeshGeneratorX3(Real x, LogicalLocation const& loc);
 
+
+// Helper functions
+void GetLatLon(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+void GetUV(Real *U, Real *V, Coordinates *pcoord, Real V2, Real V3, int k, int j, int i);
+void GetVyVz(Real *V2, Real *V3, Coordinates *pcoord, Real U, Real V, int k, int j, int i);
+// Helper functions adapted from Paul
+void VecTransABPFromRLL(
+	Real dX,
+	Real dY,
+	int nP,
+	Real dUlon,
+	Real dUlat,
+	Real & dUalpha,
+	Real & dUbeta
+);
+void VecTransRLLFromABP(
+	Real dX,
+	Real dY,
+	int nP,
+	Real dUalpha,
+	Real dUbeta,
+	Real & dUlon,
+	Real & dUlat
+);
+void RLLFromXYP(
+	Real dX,
+	Real dY,
+	int nP,
+	Real &lon,
+	Real &lat
+);
+void XYPFromRLL(
+	Real lon,
+	Real lat,
+	Real &dX,
+	Real &dY,
+	int &nP
+);
+
 class GnomonicEquiangle : public Coordinates {
 public:
   GnomonicEquiangle(MeshBlock *pmb, ParameterInput *pin, bool flag);
   void Face1Area(const int k, const int j, const int il, const int iu,
-                 AthenaArray<Real> &area) final;
-  void Face2Area(const int k, const int j, const int il, const int iu,
-                 AthenaArray<Real> &area) final;
-  void Face3Area(const int k, const int j, const int il, const int iu,
                  AthenaArray<Real> &area) final;
   Real GetFace1Area(const int k, const int j, const int i) final;
   Real GetFace2Area(const int k, const int j, const int i) final;
