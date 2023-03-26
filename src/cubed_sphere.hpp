@@ -29,22 +29,22 @@ void GetUV(Real *U, Real *V, Coordinates *pcoord, Real V2, Real V3, int k, int j
 void GetVyVz(Real *V2, Real *V3, Coordinates *pcoord, Real U, Real V, int k, int j, int i);
 // Helper functions adapted from Paul
 void VecTransABPFromRLL(
-	Real dX,
-	Real dY,
-	int nP,
-	Real dUlon,
-	Real dUlat,
-	Real & dUalpha,
-	Real & dUbeta
+	Real X,
+	Real Y,
+	int blockID,
+	Real U,
+	Real V,
+	Real *V2,
+	Real *V3
 );
 void VecTransRLLFromABP(
-	Real dX,
-	Real dY,
-	int nP,
-	Real dUalpha,
-	Real dUbeta,
-	Real & dUlon,
-	Real & dUlat
+	Real X,
+	Real Y,
+	int blockID,
+	Real V2,
+	Real V3,
+	Real *U,
+	Real *V
 );
 void RLLFromXYP(
 	Real dX,
