@@ -66,6 +66,11 @@ public:
   GnomonicEquiangle(MeshBlock *pmb, ParameterInput *pin, bool flag);
   void Face1Area(const int k, const int j, const int il, const int iu,
                  AthenaArray<Real> &area) final;
+  void Face2Area(const int k, const int j, const int il, const int iu,
+                 AthenaArray<Real> &area) final;
+  void Face3Area(const int k, const int j, const int il, const int iu,
+                 AthenaArray<Real> &area) final;
+
   Real GetFace1Area(const int k, const int j, const int i) final;
   Real GetFace2Area(const int k, const int j, const int i) final;
   Real GetFace3Area(const int k, const int j, const int i) final;
