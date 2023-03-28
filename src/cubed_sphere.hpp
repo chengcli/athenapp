@@ -85,6 +85,13 @@ public:
                           AthenaArray<Real> &vol);
   Real GetCellVolume(const int k, const int j, const int i);
 
+  void CenterWidth1(const int k, const int j, const int il, const int iu,
+                                AthenaArray<Real> &dx1);
+  void CenterWidth2(const int k, const int j, const int il, const int iu,
+                                AthenaArray<Real> &dx2);
+  void CenterWidth3(const int k, const int j, const int il, const int iu,
+                                AthenaArray<Real> &dx3);
+
   void CellMetric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
   void Face1Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
   void Face2Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
