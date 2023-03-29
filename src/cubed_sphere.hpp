@@ -115,6 +115,9 @@ public:
         const int k, const int j, const int il, const int iu,
         const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
         AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
+  void AddCoordTermsDivergence(
+    const Real dt, const AthenaArray<Real> *flux,
+    const AthenaArray<Real> &prim, const AthenaArray<Real> &bcc, AthenaArray<Real> &u);
 };
 
 class AffineCoordinate : public Coordinates {
