@@ -54,6 +54,7 @@ class Hydro {
   AthenaArray<Real> L3DValues[3], R3DValues[3];
   MPI_Request send_request[4];
   MPI_Request recv_request[4];
+  std::vector<Real> LRDataBuffer[4];
 #endif
 
   // storage for SMR/AMR
