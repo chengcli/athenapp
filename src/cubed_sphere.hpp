@@ -25,6 +25,9 @@ Real CubedSphereMeshGeneratorX3(Real x, LogicalLocation const& loc);
 
 // Helper functions
 void GetLatLon(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+void GetLatLonFace2(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+void GetLatLonFace3(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+
 void GetUV(Real *U, Real *V, Coordinates *pcoord, Real V2, Real V3, int k, int j, int i);
 void GetVyVz(Real *V2, Real *V3, Coordinates *pcoord, Real U, Real V, int k, int j, int i);
 // Helper functions adapted from Paul
