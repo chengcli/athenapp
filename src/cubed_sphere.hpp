@@ -75,6 +75,10 @@ public:
   Real GetFace2Area(const int k, const int j, const int i) final;
   Real GetFace3Area(const int k, const int j, const int i) final;
 
+  Real GetVolCenterFace1Area(const int k, const int j, const int i);
+  Real GetVolCenterFace2Area(const int k, const int j, const int i);
+  Real GetVolCenterFace3Area(const int k, const int j, const int i);
+
   void VolCenterFace1Area(const int k, const int j, const int il, const int iu,
                           AthenaArray<Real> &area) final;
   void VolCenterFace2Area(const int k, const int j, const int il, const int iu,
@@ -118,6 +122,24 @@ public:
   void AddCoordTermsDivergence(
     const Real dt, const AthenaArray<Real> *flux,
     const AthenaArray<Real> &prim, const AthenaArray<Real> &bcc, AthenaArray<Real> &u);
+
+
+  void Edge1Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void Edge2Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void Edge3Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void VolCenter1Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void VolCenter2Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void VolCenter3Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  Real GetEdge1Length(const int k, const int j, const int i);
+  Real GetEdge2Length(const int k, const int j, const int i);
+  Real GetEdge3Length(const int k, const int j, const int i);
+
 };
 
 class AffineCoordinate : public Coordinates {
