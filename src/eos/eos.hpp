@@ -24,7 +24,7 @@
 // Declarations
 class Hydro;
 class ParameterInput;
-class Thermodynamics;
+//class Thermodynamics;
 struct FaceField;
 
 //! \class EquationOfState
@@ -156,11 +156,11 @@ class EquationOfState {
   Real GetGamma() const {return gamma_;}
 #endif
   Real getGamma() const {return GetGamma();}
-  EquationOfState* use(Thermodynamics *);
+  //EquationOfState* use(Thermodynamics *);
 
  private:
   // added by cli
-  Thermodynamics const* pthermo_;
+  //Thermodynamics const* pthermo_;
 
   // (C++11) in-class Default Member Initializer (fallback option):
   const Real float_min{std::numeric_limits<float>::min()};
