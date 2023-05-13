@@ -40,31 +40,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/setup_compiler_flags.cmake)
 
 ## 2. set up project specific configuration ##
 message(STATUS "2. Set up project specific configuration ...")
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameter.cmake)
-
-# remove main file
-if (EXISTS "${CMAKE_SOURCE_DIR}/src/main.cpp")
-  message(STATUS "Found main.cpp in ${CMAKE_SOURCE_DIR}/src/main.cpp")
-  list(FILTER _src_files EXCLUDE REGEX ".*/src/main\\.cpp$")
-endif()
-
-# calcualte_fluxes delegates to user
-if (EXISTS "${CMAKE_SOURCE_DIR}/src/hydro/calculate_fluxes.cpp")
-    message(STATUS "Found calculate_fluxes.cpp in ${CMAKE_SOURCE_DIR}/src/hydro/calculate_fluxes.cpp")
-    list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
-endif()
-
-# new_blockdt delegates to user
-if (EXISTS "${CMAKE_SOURCE_DIR}/src/hydro/new_blockdt.cpp")
-    message(STATUS "Found new_blockdt.cpp in ${CMAKE_SOURCE_DIR}/src/hydro/new_blockdt.cpp")
-    list(FILTER _src_files EXCLUDE REGEX ".*/src/hydro/new_blockdt\\.cpp$")
-endif()
-
-# outputs delegates to user
-if (EXISTS "${CMAKE_SOURCE_DIR}/outputs/outputs.cpp")
-    message(STATUS "Found outputs.cpp in ${CMAKE_SOURCE_DIR}/outputs/outputs.cpp")
-    list(FILTER _src_files EXCLUDE REGEX ".*/src/outputs/outputs\\.cpp$")
-endif()
+message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake)
 
 ## 3. set up project system libraries ##
 if (${MPI_OPTION} STREQUAL "MPI_PARALLEL")
