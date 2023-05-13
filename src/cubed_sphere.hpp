@@ -22,6 +22,48 @@ void DeProjectLocalCartesianAffine(AthenaArray<Real> &flux,
 Real CubedSphereMeshGeneratorX2(Real x, LogicalLocation const& loc);
 Real CubedSphereMeshGeneratorX3(Real x, LogicalLocation const& loc);
 
+
+// Helper functions
+void GetLatLon(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+void GetLatLonFace2(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+void GetLatLonFace3(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+
+void GetUV(Real *U, Real *V, Coordinates *pcoord, Real V2, Real V3, int k, int j, int i);
+void GetVyVz(Real *V2, Real *V3, Coordinates *pcoord, Real U, Real V, int k, int j, int i);
+// Helper functions adapted from Paul
+void VecTransABPFromRLL(
+	Real X,
+	Real Y,
+	int blockID,
+	Real U,
+	Real V,
+	Real *V2,
+	Real *V3
+);
+void VecTransRLLFromABP(
+	Real X,
+	Real Y,
+	int blockID,
+	Real V2,
+	Real V3,
+	Real *U,
+	Real *V
+);
+void RLLFromXYP(
+	Real dX,
+	Real dY,
+	int nP,
+	Real &lon,
+	Real &lat
+);
+void XYPFromRLL(
+	Real lon,
+	Real lat,
+	Real &dX,
+	Real &dY,
+	int &nP
+);
+
 class GnomonicEquiangle : public Coordinates {
 public:
   GnomonicEquiangle(MeshBlock *pmb, ParameterInput *pin, bool flag);
@@ -31,9 +73,14 @@ public:
                  AthenaArray<Real> &area) final;
   void Face3Area(const int k, const int j, const int il, const int iu,
                  AthenaArray<Real> &area) final;
+
   Real GetFace1Area(const int k, const int j, const int i) final;
   Real GetFace2Area(const int k, const int j, const int i) final;
   Real GetFace3Area(const int k, const int j, const int i) final;
+
+  Real GetVolCenterFace1Area(const int k, const int j, const int i);
+  Real GetVolCenterFace2Area(const int k, const int j, const int i);
+  Real GetVolCenterFace3Area(const int k, const int j, const int i);
 
   void VolCenterFace1Area(const int k, const int j, const int il, const int iu,
                           AthenaArray<Real> &area) final;
@@ -44,6 +91,13 @@ public:
   void CellVolume(const int k, const int j, const int il, const int iu,
                           AthenaArray<Real> &vol);
   Real GetCellVolume(const int k, const int j, const int i);
+
+  void CenterWidth1(const int k, const int j, const int il, const int iu,
+                                AthenaArray<Real> &dx1);
+  void CenterWidth2(const int k, const int j, const int il, const int iu,
+                                AthenaArray<Real> &dx2);
+  void CenterWidth3(const int k, const int j, const int il, const int iu,
+                                AthenaArray<Real> &dx3);
 
   void CellMetric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
   void Face1Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
@@ -68,6 +122,27 @@ public:
         const int k, const int j, const int il, const int iu,
         const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
         AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
+  void AddCoordTermsDivergence(
+    const Real dt, const AthenaArray<Real> *flux,
+    const AthenaArray<Real> &prim, const AthenaArray<Real> &bcc, AthenaArray<Real> &u);
+
+
+  void Edge1Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void Edge2Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void Edge3Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void VolCenter1Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void VolCenter2Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  void VolCenter3Length(const int k, const int j, const int il, const int iu,
+      AthenaArray<Real> &len);
+  Real GetEdge1Length(const int k, const int j, const int i);
+  Real GetEdge2Length(const int k, const int j, const int i);
+  Real GetEdge3Length(const int k, const int j, const int i);
+
 };
 
 class AffineCoordinate : public Coordinates {
