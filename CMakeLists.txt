@@ -44,12 +44,14 @@ message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake)
 
 ## 3. set up project system libraries ##
+message(STATUS "3. Set up project system libraries ...")
 if (${MPI_OPTION} STREQUAL "MPI_PARALLEL")
     find_package(MPI REQUIRED)
 endif()
 
 ## 4. set up project configure file and library ##
-message(STATUS "4. Set up project libraries")
+message(STATUS "4. Set up project libraries ...")
+message(STATUS "Find project definitions in src/defs.hpp")
 configure_file(src/defs.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/defs.hpp @ONLY)
 add_subdirectory(src)
 
