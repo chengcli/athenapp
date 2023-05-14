@@ -1,0 +1,84 @@
+diff --git a/cmake/setup_parameters.cmake b/cmake/setup_parameters.cmake
+index 04a19106..97231806 100644
+--- a/cmake/setup_parameters.cmake
++++ b/cmake/setup_parameters.cmake
+@@ -79,6 +79,15 @@ SET_IF_EMPTY(DEBUG_OPTION "NOT_DEBUG")
+ # try/throw/catch C++ exception handling (ENABLE_EXCEPTIONS or DISABLE_EXCEPTIONS)
+ SET_IF_EMPTY(EXCEPTION_HANDLING_OPTION "ENABLE_EXCEPTIONS")
+ 
++# cubed sphere option (CUBED_SPHERE or NOT_CUBED_SPHERE)
++SET_IF_EMPTY(CUBED_SPHERE_OPTION "NOT_CUBED_SPHERE")
++
++# affine coordinate option (AFFINE or NOT_AFFINE)
++SET_IF_EMPTY(AFFINE_OPTION "NOT_AFFINE")
++
++# hydrostatic option (HYDROSTATIC or NOT_HYDROSTATIC)
++SET_IF_EMPTY(HYDROSTATIC_OPTION "NOT_HYDROSTATIC")
++
+ # compiler options
+ SET_IF_EMPTY(COMPILER_CHOICE ${CMAKE_CXX_COMPILER_ID})
+ SET_IF_EMPTY(COMPILER_COMMAND ${CMAKE_CXX_COMPILER})
+@@ -91,3 +100,4 @@ SET_IF_EMPTY(NFIELD_VARIABLES 0)
+ SET_IF_EMPTY(NWAVE_VALUE 5)
+ SET_IF_EMPTY(NUMBER_PASSIVE_SCALARS 0)
+ SET_IF_EMPTY(NUMBER_GHOST_CELLS 2)
++SET_IF_EMPTY(NVAPOR_VARIABLES 0)
+diff --git a/src/athena.hpp b/src/athena.hpp
+index 6226979c..25ae1a64 100644
+--- a/src/athena.hpp
++++ b/src/athena.hpp
+@@ -23,11 +23,13 @@
+ using Real = float;
+ #ifdef MPI_PARALLEL
+ #define MPI_ATHENA_REAL MPI_FLOAT
++#define MPI_REAL_INT MPI_FLOAT_INT
+ #endif
+ #else
+ using Real = double;
+ #ifdef MPI_PARALLEL
+ #define MPI_ATHENA_REAL MPI_DOUBLE
++#define MPI_REAL_INT MPI_DOUBLE_INT
+ #endif
+ #endif
+ 
+@@ -133,12 +135,13 @@ struct EdgeField {
+ // explicitly specified enumerator values aare unnecessary, but provided for clarity:
+ 
+ //! array indices for conserved: density, momemtum, total energy
+-enum ConsIndex {IDN=0, IM1=1, IM2=2, IM3=3, IEN=4};
++enum ConsIndex {IDN=0, IM1=1+NVAPOR, IM2=2+NVAPOR, IM3=3+NVAPOR, IEN=4+NVAPOR};
+ //! array indices for face-centered field
+ enum MagneticIndex {IB1=0, IB2=1, IB3=2};
+ 
+ //! array indices for 1D primitives: velocity, transverse components of field
+-enum PrimIndex {IVX=1, IVY=2, IVZ=3, IPR=4, IBY=(NHYDRO), IBZ=((NHYDRO)+1)};
++enum PrimIndex {IVX=1+NVAPOR, IVY=2+NVAPOR, IVZ=3+NVAPOR, IPR=4+NVAPOR,
++  IBY=(NHYDRO), IBZ=((NHYDRO)+1)};
+ 
+ //! array indices for face-centered electric fields returned by Riemann solver
+ enum ElectricIndex {X1E2=0, X1E3=1, X2E3=0, X2E1=1, X3E1=0, X3E2=1};
+diff --git a/src/defs.hpp.in b/src/defs.hpp.in
+index 5200a981..69e54e68 100644
+--- a/src/defs.hpp.in
++++ b/src/defs.hpp.in
+@@ -90,10 +90,20 @@
+ #define COMPILER_COMMAND "@COMPILER_COMMAND@"
+ #define COMPILED_WITH_OPTIONS "@COMPILER_FLAGS@" // NOLINT
+ 
++// CubedSphere option
++#define @CUBED_SPHERE_OPTION@
++
++// Affine option
++#define @AFFINE_OPTION@
++
++// Hydrostatic option
++#define @HYDROSTATIC_OPTION@
++
+ //----------------------------------------------------------------------------------------
+ // macros associated with numerical algorithm (rarely modified)
+ 
+ #define NHYDRO @NHYDRO_VARIABLES@
++#define NVAPOR @NVAPOR_VARIABLES@
+ #define NFIELD @NFIELD_VARIABLES@
+ #define NWAVE @NWAVE_VALUE@
+ #define NSCALARS @NUMBER_PASSIVE_SCALARS@
