@@ -1,0 +1,39 @@
+diff --git a/src/mesh/mesh.cpp b/src/mesh/mesh.cpp
+index 8d7fbe05..bddce692 100644
+--- a/src/mesh/mesh.cpp
++++ b/src/mesh/mesh.cpp
+@@ -138,9 +138,9 @@ Mesh::Mesh(ParameterInput *pin, int mesh_test) :
+   }
+ 
+   // check number of grid cells in root level of mesh from input file.
+-  if (mesh_size.nx1 < 4) {
++  if (mesh_size.nx1 < 2) {
+     msg << "### FATAL ERROR in Mesh constructor" << std::endl
+-        << "In mesh block in input file nx1 must be >= 4, but nx1="
++        << "In mesh block in input file nx1 must be >= 2, but nx1="
+         << mesh_size.nx1 << std::endl;
+     ATHENA_ERROR(msg);
+   }
+diff --git a/src/mesh/mesh.hpp b/src/mesh/mesh.hpp
+index de23f1c1..4144da63 100644
+--- a/src/mesh/mesh.hpp
++++ b/src/mesh/mesh.hpp
+@@ -18,6 +18,7 @@
+ #include <functional>  // reference_wrapper
+ #include <string>
+ #include <vector>
++#include <memory>
+ 
+ // Athena++ headers
+ #include "../athena.hpp"
+@@ -141,6 +142,10 @@ class MeshBlock {
+   void UserWorkBeforeOutput(ParameterInput *pin); // called in Mesh fn (friend class)
+   void UserWorkInLoop();                          // called in TimeIntegratorTaskList
+ 
++  // opaque pointer
++  class Impl;
++  std::shared_ptr<Impl> pimpl;
++
+  private:
+   // data
+   Real new_block_dt_, new_block_dt_hyperbolic_, new_block_dt_parabolic_,
