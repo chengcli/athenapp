@@ -22,6 +22,9 @@
 
 // Athena++ headers
 
+template<typename T>
+class StrideIterator;
+
 template <typename T>
 class AthenaArray {
  public:
@@ -91,6 +94,14 @@ class AthenaArray {
   int GetDim5() const { return nx5_; }
   int GetDim6() const { return nx6_; }
 
+  // functions to set array dimensions
+  void SetDim1(int nx1) { nx1_ = nx1; }
+  void SetDim2(int nx2) { nx2_ = nx2; }
+  void SetDim3(int nx3) { nx3_ = nx3; }
+  void SetDim4(int nx4) { nx4_ = nx4; }
+  void SetDim5(int nx5) { nx5_ = nx5; }
+  void SetDim6(int nx6) { nx6_ = nx6; }
+
   // a function to get the total size of the array
   int GetSize() const {
     if (state_ == DataStatus::empty)
@@ -124,34 +135,34 @@ class AthenaArray {
     return pdata_[n]; }
   // "const variants" called for "const AthenaArray<T>" returns T by value, since T is
   // typically a built-in type (versus "const T &" to avoid copying for general types)
-  T operator() (const int n) const {
+  T const& operator() (const int n) const {
     return pdata_[n]; }
 
   T &operator() (const int n, const int i) {
     return pdata_[i + nx1_*n]; }
-  T operator() (const int n, const int i) const {
+  T const& operator() (const int n, const int i) const {
     return pdata_[i + nx1_*n]; }
 
   T &operator() (const int n, const int j, const int i) {
     return pdata_[i + nx1_*(j + nx2_*n)]; }
-  T operator() (const int n, const int j, const int i) const {
+  T const& operator() (const int n, const int j, const int i) const {
     return pdata_[i + nx1_*(j + nx2_*n)]; }
 
   T &operator() (const int n, const int k, const int j, const int i) {
     return pdata_[i + nx1_*(j + nx2_*(k + nx3_*n))]; }
-  T operator() (const int n, const int k, const int j, const int i) const {
+  T const& operator() (const int n, const int k, const int j, const int i) const {
     return pdata_[i + nx1_*(j + nx2_*(k + nx3_*n))]; }
 
   T &operator() (const int m, const int n, const int k, const int j, const int i) {
     return pdata_[i + nx1_*(j + nx2_*(k + nx3_*(n + nx4_*m)))]; }
-  T operator() (const int m, const int n, const int k, const int j, const int i) const {
+  T const& operator() (const int m, const int n, const int k, const int j, const int i) const {
     return pdata_[i + nx1_*(j + nx2_*(k + nx3_*(n + nx4_*m)))]; }
 
   // int l?, int o?
   T &operator() (const int p, const int m, const int n, const int k, const int j,
                  const int i) {
     return pdata_[i + nx1_*(j + nx2_*(k + nx3_*(n + nx4_*(m + nx5_*p))))]; }
-  T operator() (const int p, const int m, const int n, const int k, const int j,
+  T const& operator() (const int p, const int m, const int n, const int k, const int j,
                 const int i) const {
     return pdata_[i + nx1_*(j + nx2_*(k + nx3_*(n + nx4_*(m + nx5_*p))))]; }
 
@@ -161,6 +172,19 @@ class AthenaArray {
 
   void ShallowSlice3DToPencil(AthenaArray<T> &src, const int k, const int j,
                               const int il, const int n);
+
+  // access stride iterator, cli
+  StrideIterator<T*> at(int i) const {
+    return StrideIterator<T*>(pdata_ + i, nx1_);
+  }
+
+  StrideIterator<T*> at(int j, int i) const {
+    return StrideIterator<T*>(pdata_ + i + nx1_*j, nx1_*nx2_);
+  }
+
+  StrideIterator<T*> at(int k, int j, int i) const {
+    return StrideIterator<T*>(pdata_ + i + nx1_*j + nx1_*nx2_*k, nx1_*nx2_*nx3_);
+  }
 
  private:
   T *pdata_;
