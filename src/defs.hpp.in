@@ -96,10 +96,20 @@
 #define COMPILER_COMMAND "@COMPILER_COMMAND@"
 #define COMPILED_WITH_OPTIONS "@COMPILER_FLAGS@" // NOLINT
 
+// CubedSphere option
+#define @CUBED_SPHERE_OPTION@
+
+// Affine option
+#define @AFFINE_OPTION@
+
+// Hydrostatic option
+#define @HYDROSTATIC_OPTION@
+
 //----------------------------------------------------------------------------------------
 // macros associated with numerical algorithm (rarely modified)
 
 #define NHYDRO @NHYDRO_VARIABLES@
+#define NVAPOR @NVAPOR_VARIABLES@
 #define NFIELD @NFIELD_VARIABLES@
 #define NWAVE @NWAVE_VALUE@
 #define NSCALARS @NUMBER_PASSIVE_SCALARS@
