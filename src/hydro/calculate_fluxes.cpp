@@ -61,6 +61,7 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
   //--------------------------------------------------------------------------------------
   // i-direction
 
+#ifndef HYDROSTATIC // only need to calculate x1-fluxes if not hydrostatic
   AthenaArray<Real> &x1flux = flux[X1DIR];
   // set the loop limits
   jl = js, ju = je, kl = ks, ku = ke;
@@ -157,6 +158,7 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
   } // end if (order == 4)
   //------------------------------------------------------------------------------
   // end x1 fourth-order hydro
+#endif // HYDROSTATIC
 
   //--------------------------------------------------------------------------------------
   // j-direction
