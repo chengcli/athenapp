@@ -1,0 +1,393 @@
+diff --git a/.gitignore b/.gitignore
+index 4d26a143..db7c1603 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -62,3 +62,6 @@ meshtest.dat
+ 
+ # compiled doxygen file
+ doc/doxy*
++
++# build
++build/
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 00000000..091514f9
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,60 @@
++# Installs athenapp library
++#
++#   library: libathenapp_debug.a
++#   library: libathenapp_release.a
++#
++# Define the following variables
++#
++#   ATHENAPP_INCLUDE_DIR
++#   ATHENAPP_LIBRARY_DEBUG
++#   ATHENAPP_LIBRARY_RELEASE
++#
++# Normal usage would be
++#
++#   include_directories( ${ATHENAPP_INCLUDE_DIR})
++#   target_link_libraries( ${ATHENAPP_LIBRARY_DEBUG})
++#
++cmake_minimum_required(VERSION 3.10)
++
++project(
++  ATHENAPP
++  LANGUAGES CXX
++  )
++set(CMAKE_CXX_STANDARD 14)
++message(STATUS "")
++message(STATUS "== Setting up athenapp library ==")
++
++if (NOT CMAKE_BUILD_TYPE)
++  set(CMAKE_BUILD_TYPE Release)
++  message(STATUS "Default Build Type = Release")
++  message(STATUS "")
++else()
++  message(STATUS "Build Type = ${CMAKE_BUILD_TYPE}")
++  message(STATUS "")
++endif()
++
++## 1. set up compiler flags ##
++message(STATUS "1. Set up project compiler flags ...")
++message(STATUS "Include ${CMAKE_SOURCE_DIR}/cmake/setup_compiler_flags.cmake")
++include(${CMAKE_SOURCE_DIR}/cmake/setup_compiler_flags.cmake)
++
++## 2. set up project specific configuration ##
++message(STATUS "2. Set up project specific configuration ...")
++message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake")
++include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake)
++
++## 3. set up project system libraries ##
++message(STATUS "3. Set up project system libraries ...")
++if (${MPI_OPTION} STREQUAL "MPI_PARALLEL")
++    find_package(MPI REQUIRED)
++endif()
++
++## 4. set up project configure file and library ##
++message(STATUS "4. Set up project libraries ...")
++message(STATUS "Find project definitions in src/defs.hpp")
++configure_file(src/defs.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/defs.hpp @ONLY)
++add_subdirectory(src)
++
++#include_directories(
++#  ${CMAKE_CURRENT_BINARY_DIR}
++#  )
+diff --git a/cmake/setup_compiler_flags.cmake b/cmake/setup_compiler_flags.cmake
+new file mode 100644
+index 00000000..9313021b
+--- /dev/null
++++ b/cmake/setup_compiler_flags.cmake
+@@ -0,0 +1,86 @@
++# Checks for compiler features (such as C++14 support) and compiler
++# specific bugs that
++#   - usually set up further configuration (such as preprocessor
++#     definitions)
++#   - disable a specific flag for a specific compiler version.
++#
++
++# General setup for GCC and compilers sufficiently close to GCC:
++#
++if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
++  set(CMAKE_CXX_FLAGS_RELEASE 
++    "-O2 -funroll-loops -funroll-all-loops -fstrict-aliasing"
++    )
++
++  set(CMAKE_CXX_FLAGS_DEBUG
++    "-g3"
++    )
++  set(CMAKE_C_FLAGS_RELEASE 
++    "-O2 -funroll-loops -funroll-all-loops -fstrict-aliasing"
++    )
++
++  set(CMAKE_C_FLAGS_DEBUG
++    "-g3"
++    )
++
++  #set(CMAKE_Fortran_FLAGS_RELEASE
++  #  "-O3"
++  #  )
++  set(KNOWN_COMPILER TRUE)
++endif()
++
++if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
++  set(CMAKE_CXX_FLAGS_RELEASE 
++    "-O2 -funroll-loops -fstrict-aliasing"
++    )
++
++  set(CMAKE_CXX_FLAGS_DEBUG
++    "-g3"
++    )
++  set(CMAKE_C_FLAGS_RELEASE 
++    "-O2 -funroll-loops -fstrict-aliasing"
++    )
++
++  set(CMAKE_C_FLAGS_DEBUG
++    "-g3"
++    )
++
++  #set(CMAKE_Fortran_FLAGS_RELEASE
++  #  "-O3"
++  #  )
++  set(KNOWN_COMPILER TRUE)
++endif()
++
++#
++# Setup for ICC compiler (version >= 10):
++#
++if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
++	message(FATAL_ERROR "\n"
++		"Intel complier not implemented.\n\n"
++		)
++	#  set(_flags ${CMAKE_SOURCE_DIR}/cmake/compiler_flags_intel.cmake)
++	# message(STATUS "Include ${_flags}")
++	#  include(${_flags})
++	#  set(KNOWN_COMPILER TRUE)
++endif()
++
++#
++# Setup for MSVC compiler (version >= 2012):
++#
++if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
++	message(FATAL_ERROR "\n"
++		"MSVC compiler not implemented.\n\n"
++        )
++	#set(_flags ${CMAKE_SOURCE_DIR}/cmake/compiler_flags_msvc.cmake)
++	#message(STATUS "Include ${_flags}")
++	#include(${_flags})
++	#set(KNOWN_COMPILER TRUE)
++endif()
++
++if (NOT KNOWN_COMPILER)
++  message(FATAL_ERROR "\n"
++    "Unknown compiler!\n"
++    "If you're serious about it, set SETUP_DEFAULT_COMPILER_FLAGS=OFF "
++    "and set the relevant compiler options by hand.\n\n"
++    )
++endif()
+diff --git a/cmake/setup_parameters.cmake b/cmake/setup_parameters.cmake
+new file mode 100644
+index 00000000..6aa8429d
+--- /dev/null
++++ b/cmake/setup_parameters.cmake
+@@ -0,0 +1,93 @@
++## defines default parameters
++
++## define a macro to set a variable if it is empty
++macro(SET_IF_EMPTY _variable)
++    if("${${_variable}}" STREQUAL "")
++        set(${_variable} ${ARGN})
++    endiF()
++endmacro()
++
++## populate the default values
++
++## configure.py dict(definitions) string values:
++# problem generator
++SET_IF_EMPTY(PROBLEM "shock_tube")
++
++# coordinate system
++SET_IF_EMPTY(COORDINATE_SYSTEM "cartesian")
++
++# Riemann solver
++SET_IF_EMPTY(RSOLVER "hllc")
++
++# Equation of state
++SET_IF_EMPTY(EQUATION_OF_STATE "adiabatic")
++
++## configure.py dict(definitions) Boolean values:
++# use general EOS framework default=0 (false).
++SET_IF_EMPTY(GENERAL_EOS 0)
++
++# use EOS table default=0 (false).
++SET_IF_EMPTY(EOS_TABLE_ENABLED 0)
++
++# non-barotropic equation of state (i.e. P not simply a func of rho)? default=1 (true)
++SET_IF_EMPTY(NON_BAROTROPIC_EOS 1)
++
++# include magnetic fields? default=0 (false)
++SET_IF_EMPTY(MAGNETIC_FIELDS_ENABLED 0)
++
++# include super-time-stepping? default=0 (false)
++SET_IF_EMPTY(STS_ENABLED 0)
++
++# include self gravity? default=0 (false)
++SET_IF_EMPTY(SELF_GRAVITY_ENABLED 0)
++
++# include radiative transfer? default=0 (false)
++SET_IF_EMPTY(RADIATION_ENABLED 0)
++
++# enable special or general relativity? default=0 (false)
++SET_IF_EMPTY(RELATIVISTIC_DYNAMICS 0)
++
++# enable general relativity? default=0 (false)
++SET_IF_EMPTY(GENERAL_RELATIVITY 0)
++
++# enable GR frame transformations? default=0 (false)
++SET_IF_EMPTY(FRAME_TRANSFORMATIONS 0)
++
++# use single precision floating-point values (binary32)? default=0 (false; use binary64)
++SET_IF_EMPTY(SINGLE_PRECISION_ENABLED 0)
++
++# use double precision for HDF5 output? default=0 (false; write out binary32)
++SET_IF_EMPTY(H5_DOUBLE_PRECISION_ENABLED 0)
++
++## configure.py dict(definitions) Boolean string macros:
++## (these options have the latter (false) option as defaults, unless noted otherwise)
++# make use of FFT? (FFT or NO_FFT)
++SET_IF_EMPTY(FFT_OPTION "NO_FFT")
++
++# MPI parallelization (MPI_PARALLEL or NOT_MPI_PARALLEL)
++SET_IF_EMPTY(MPI_OPTION "NOT_MPI_PARALLEL")
++
++# OpenMP parallelization (OPENMP_PARALLEL or NOT_OPENMP_PARALLEL)
++SET_IF_EMPTY(OPENMP_OPTION "NOT_OPENMP_PARALLEL")
++
++# HDF5 output (HDF5OUTPUT or NO_HDF5OUTPUT)
++SET_IF_EMPTY(HDF5_OPTION "NO_HDF5OUTPUT")
++
++# debug build macros (DEBUG or NOT_DEBUG)
++SET_IF_EMPTY(DEBUG_OPTION "NOT_DEBUG")
++
++# try/throw/catch C++ exception handling (ENABLE_EXCEPTIONS or DISABLE_EXCEPTIONS)
++SET_IF_EMPTY(EXCEPTION_HANDLING_OPTION "ENABLE_EXCEPTIONS")
++
++# compiler options
++SET_IF_EMPTY(COMPILER_CHOICE ${CMAKE_CXX_COMPILER_ID})
++SET_IF_EMPTY(COMPILER_COMMAND ${CMAKE_CXX_COMPILER})
++string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
++SET_IF_EMPTY(COMPILER_FLAGS ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
++
++# macros associated with numerical algorithm (rarely modified)
++SET_IF_EMPTY(NHYDRO_VARIABLES 5)
++SET_IF_EMPTY(NFIELD_VARIABLES 0)
++SET_IF_EMPTY(NWAVE_VALUE 5)
++SET_IF_EMPTY(NUMBER_PASSIVE_SCALARS 0)
++SET_IF_EMPTY(NUMBER_GHOST_CELLS 2)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+new file mode 100644
+index 00000000..9a026dd5
+--- /dev/null
++++ b/src/CMakeLists.txt
+@@ -0,0 +1,119 @@
++# Creates athenapp library
++
++set(namel athenapp)
++string(TOUPPER ${namel} nameu)
++
++# set GENERAL_EOS_FILE, EOS_FILE, RSOLVER_DIR, RSOLVER_FILE, PROBLEM_FILE
++set(GENERAL_EOS_FILE noop.cpp)
++set(EOS_FILE ${EQUATION_OF_STATE})
++set(RSOLVER_FILE ${RSOLVER})
++set(PROBLEM_FILE ${PROBLEM})
++
++if (MAGNETIC_FILEDS_ENABLED EQUAL 1)
++    set(EOS_FILE ${EOS_FILE}_mhd)
++    set(RSOLVER_DIR mhd/)
++    set(RSOLVER_FILE ${RSOLVER_FILE}_mhd)
++else()
++    set(EOS_FILE ${EOS_FILE}_hydro)
++    set(RSOLVER_DIR hydro/)
++endif()
++
++set(EOS_FILE ${EOS_FILE}.cpp)
++set(RSOLVER_FILE ${RSOLVER_FILE}.cpp)
++set(PROBLEM_FILE ${PROBLEM_FILE}.cpp)
++
++message(STATUS ${RSOLVER_DIR}${RSOLVER_FILE})
++
++# source files are defined in Makefile.in
++file(GLOB src_files
++    *.cpp
++    bvals/*.cpp
++    bvals/cc/*.cpp
++    bvals/cc/fft_grav/*.cpp
++    bvals/cc/hydro/*.cpp
++    bvals/cc/mg/*.cpp
++    bvals/fc/*.cpp
++    bvals/orbital/*.cpp
++    bvals/utils/*.cpp
++    coordinates/*.cpp
++    eos/general/${GENERAL_EOS_FILE}
++    eos/${EOS_FILE}
++    eos/eos_high_order.cpp
++    eos/eos_scalars.cpp
++    fft/*.cpp
++    field/*.cpp
++    field/field_diffusion/*.cpp
++    gravity/*.cpp
++    hydro/*.cpp
++    hydro/srcterms/*.cpp
++    hydro/hydro_diffusion/*.cpp
++    hydro/rsolvers/${RSOLVER_DIR}${RSOLVER_FILE}
++    inputs/*.cpp
++    mesh/*.cpp
++    multigrid/*.cpp
++    orbital_advection/*.cpp
++    outputs/*.cpp
++    pgen/default_pgen.cpp
++    pgen/${PROBLEM_FILE}
++    reconstruct/*.cpp
++    scalars/*.cpp
++    task_list/*.cpp
++    utils/*.cpp
++    ${MPIFFT_FILE}
++  )
++
++# remove main file
++if (EXISTS "${CMAKE_SOURCE_DIR}/src/main.cpp")
++    list(FILTER src_files EXCLUDE REGEX ".*/src/main\\.cpp$")
++endif()
++
++# user mod calcualte_fluxes
++if (EXISTS "${CMAKE_SOURCE_DIR}/mod/hydro/calculate_fluxes.cpp")
++    message(STATUS "Found calculate_fluxes.cpp in ${CMAKE_SOURCE_DIR}/mod/hydro/calculate_fluxes.cpp")
++    list(FILTER src_files EXCLUDE REGEX ".*/mod/hydro/calculate_fluxes\\.cpp$")
++endif()
++
++# user mod new_blockdt
++if (EXISTS "${CMAKE_SOURCE_DIR}/mod/hydro/new_blockdt.cpp")
++    message(STATUS "Found new_blockdt.cpp in ${CMAKE_SOURCE_DIR}/mod/hydro/new_blockdt.cpp")
++    list(FILTER src_files EXCLUDE REGEX ".*/mod/hydro/new_blockdt\\.cpp$")
++endif()
++
++# user mod outputs delegates
++if (EXISTS "${CMAKE_SOURCE_DIR}/mod/outputs/outputs.cpp")
++    message(STATUS "Found outputs.cpp in ${CMAKE_SOURCE_DIR}/mod/outputs/outputs.cpp")
++    list(FILTER src_files EXCLUDE REGEX ".*/mod/outputs/outputs\\.cpp$")
++endif()
++
++string(TOLOWER ${CMAKE_BUILD_TYPE} buildl)
++string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
++
++add_library(${namel}_${buildl} 
++    OBJECT 
++    ${src_files}
++    )
++
++set_target_properties(${namel}_${buildl}
++    PROPERTIES
++    COMPILE_FLAGS ${CMAKE_CXX_FLAGS_${buildu}}
++    )
++
++target_include_directories(${namel}_${buildl}
++    SYSTEM PRIVATE
++    ${MPI_CXX_INCLUDE_PATH}
++    )
++
++target_link_libraries(${namel}_${buildl}
++    ${MPI_CXX_LIBRARIES}
++    )
++
++set(${nameu}_LIBRARY_${buildu} ${namel}_${buildl}
++    CACHE STRING
++    "{namel} library ${buildu}"
++    )
++mark_as_advanced(${nameu}_LIBRARY_${buildu})
++
++set(ATHENAPP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src
++  CACHE PATH 
++  "${namel} include directory")
++mark_as_advanced(ATHENAPP_INCLUDE_DIR)
