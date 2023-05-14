@@ -1,0 +1,80 @@
+diff --git a/src/hydro/srcterms/hydro_srcterms.cpp b/src/hydro/srcterms/hydro_srcterms.cpp
+index 7212f434..f69b30f7 100644
+--- a/src/hydro/srcterms/hydro_srcterms.cpp
++++ b/src/hydro/srcterms/hydro_srcterms.cpp
+@@ -106,6 +106,10 @@ HydroSourceTerms::HydroSourceTerms(Hydro *phyd, ParameterInput *pin) {
+ 
+   if (SELF_GRAVITY_ENABLED) hydro_sourceterms_defined = true;
+ 
++  multi_layer_coupling_ = pin->GetOrAddBoolean("hydro",
++    "multi_layer_coupling", false);
++  if (multi_layer_coupling_) hydro_sourceterms_defined = true;
++
+   UserSourceTerm = phyd->pmy_block->pmy_mesh->UserSourceTerm_;
+   if (UserSourceTerm != nullptr) hydro_sourceterms_defined = true;
+ }
+@@ -145,6 +149,8 @@ void HydroSourceTerms::AddSourceTerms(const Real time, const Real dt,
+     RotatingSystemSourceTerms(dt, flux, prim, cons);
+ 
+   // MyNewSourceTerms()
++  if (multi_layer_coupling_)
++    MultiLayerCoupling(dt, flux, prim, cons);
+ 
+   //  user-defined source terms
+   if (UserSourceTerm != nullptr) {
+diff --git a/src/hydro/srcterms/hydro_srcterms.hpp b/src/hydro/srcterms/hydro_srcterms.hpp
+index caa39eab..39647484 100644
+--- a/src/hydro/srcterms/hydro_srcterms.hpp
++++ b/src/hydro/srcterms/hydro_srcterms.hpp
+@@ -62,6 +62,9 @@ class HydroSourceTerms {
+   void EnrollSrcTermFunction(SrcTermFunc my_func);
+   SrcTermFunc UserSourceTerm;
+ 
++  void MultiLayerCoupling(const Real dt,const AthenaArray<Real> *flx,
++                        const AthenaArray<Real> &prim, AthenaArray<Real> &cons);
++
+  private:
+   Hydro *pmy_hydro_;  // ptr to Hydro containing this HydroSourceTerms
+   Real gm_;           // GM for point mass MUST BE LOCATED AT ORIGIN
+@@ -70,5 +73,6 @@ class HydroSourceTerms {
+   int  ShBoxCoord_;       // ShearCoordinate type: 1=xy (default), 2=xz
+   bool flag_point_mass_;      // flag for calling PointMass function
+   int  flag_shearing_source_; // 1=orbital advection, 2=shearing box, 3=rotating system
++  bool multi_layer_coupling_; // flag for activate multi-layer coupling
+ };
+ #endif // HYDRO_SRCTERMS_HYDRO_SRCTERMS_HPP_
+diff --git a/src/hydro/srcterms/multi_layer_coupling.cpp b/src/hydro/srcterms/multi_layer_coupling.cpp
+new file mode 100644
+index 00000000..28d7d336
+--- /dev/null
++++ b/src/hydro/srcterms/multi_layer_coupling.cpp
+@@ -0,0 +1,29 @@
++#include "../../athena.hpp"
++#include "../../mesh/mesh.hpp"
++#include "../../coordinates/coordinates.hpp"
++#include "../hydro.hpp"
++#include "hydro_srcterms.hpp"
++
++void HydroSourceTerms::MultiLayerCoupling(const Real dt,const AthenaArray<Real> *flx,
++  const AthenaArray<Real> &prim, AthenaArray<Real> &cons)
++{ 
++  MeshBlock *pmb = pmy_hydro_->pmy_block;
++  Coordinates *pcoord = pmb->pcoord;
++
++  for (int k = pmb->ks; k <= pmb->ke; ++k)
++    for (int j = pmb->js; j <= pmb->je; ++j) {
++      int i1 = pmb->is, i2 = pmb->is+1;
++      Real delta = pcoord->dx1f(i2)/pcoord->dx1f(i1);
++      cons(IM2,k,j,i1) += - dt*delta*prim(IDN,k,j,i1)*
++        (prim(IDN,k,j+1,i2) - prim(IDN,k,j-1,i2))/(pcoord->x2v(j+1) - pcoord->x2v(j-1));
++      cons(IM3,k,j,i1) += - dt*delta*prim(IDN,k,j,i1)*
++        (prim(IDN,k+1,j,i2) - prim(IDN,k-1,j,i2))/(pcoord->x3v(k+1) - pcoord->x3v(k-1));
++
++      cons(IM2,k,j,i2) += - dt*prim(IDN,k,j,i2)*
++        (prim(IDN,k,j+1,i1) - prim(IDN,k,j-1,i1))/(pcoord->x2v(j+1) - pcoord->x2v(j-1));
++      cons(IM3,k,j,i2) += - dt*prim(IDN,k,j,i2)*
++        (prim(IDN,k+1,j,i1) - prim(IDN,k-1,j,i1))/(pcoord->x3v(k+1) - pcoord->x3v(k-1));
++    }
++
++  return;
++}
