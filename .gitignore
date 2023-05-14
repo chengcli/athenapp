@@ -66,3 +66,6 @@ doc/doxy*
 
 # build
 build/
+
+# junk
+z.junk/
