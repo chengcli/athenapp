@@ -1,0 +1,37 @@
+diff --git a/src/globals.cpp b/src/globals.cpp
+index fd5c2560..5d12815a 100644
+--- a/src/globals.cpp
++++ b/src/globals.cpp
+@@ -22,4 +22,6 @@ namespace Globals {
+ // all of these global variables are set at the start of main():
+ int my_rank;         // MPI rank of this process
+ int nranks;          // total number of MPI ranks
++int next_task_id = 69;  // next available task id (last item of task_list)
++int next_scalar_index = 0;  // next available scalar index
+ }
+diff --git a/src/globals.hpp b/src/globals.hpp
+index 426a70ae..885ef30b 100644
+--- a/src/globals.hpp
++++ b/src/globals.hpp
+@@ -10,6 +10,8 @@
+ 
+ namespace Globals {
+ extern int my_rank, nranks;
++extern int next_task_id;
++extern int next_scalar_index;
+ }
+ 
+ #endif // GLOBALS_HPP_
+diff --git a/src/task_list/task_list.hpp b/src/task_list/task_list.hpp
+index 4707d0a7..910df637 100644
+--- a/src/task_list/task_list.hpp
++++ b/src/task_list/task_list.hpp
+@@ -208,7 +208,7 @@ class TimeIntegratorTaskList : public TaskList {
+ 
+   bool CheckNextMainStage(int stage) const {return stage_wghts[stage%nstages].main_stage;}
+ 
+- private:
++ protected:
+   bool ORBITAL_ADVECTION; // flag for orbital advection (true w/ , false w/o)
+   bool SHEAR_PERIODIC; // flag for shear periodic boundary (true w/ , false w/o)
+   IntegratorWeight stage_wghts[MAX_NSTAGE];
