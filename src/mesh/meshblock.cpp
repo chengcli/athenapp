@@ -24,6 +24,7 @@
 #include "../athena_arrays.hpp"
 #include "../bvals/bvals.hpp"
 #include "../coordinates/coordinates.hpp"
+#include "../cubed_sphere.hpp"
 #include "../eos/eos.hpp"
 #include "../fft/athena_fft.hpp"
 #include "../field/field.hpp"
@@ -116,8 +117,11 @@ MeshBlock::MeshBlock(int igid, int ilid, LogicalLocation iloc, RegionSize input_
     pcoord = new KerrSchild(this, pin, false);
   } else if (std::strcmp(COORDINATE_SYSTEM, "gr_user") == 0) {
     pcoord = new GRUser(this, pin, false);
+  } else if (std::strcmp(COORDINATE_SYSTEM, "gnomonic_equiangle") == 0) {
+    pcoord = new GnomonicEquiangle(this, pin, false);
+  } else if (std::strcmp(COORDINATE_SYSTEM, "affine_coordinates") == 0) {
+    pcoord = new AffineCoordinate(this, pin, false);
   }
-
   // Reconstruction: constructor may implicitly depend on Coordinates, and PPM variable
   // floors depend on EOS, but EOS isn't needed in Reconstruction constructor-> this is ok
   precon = new Reconstruction(this, pin);
