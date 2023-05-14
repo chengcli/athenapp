@@ -138,9 +138,9 @@ Mesh::Mesh(ParameterInput *pin, int mesh_test) :
   }
 
   // check number of grid cells in root level of mesh from input file.
-  if (mesh_size.nx1 < 4) {
+  if (mesh_size.nx1 < 2) {
     msg << "### FATAL ERROR in Mesh constructor" << std::endl
-        << "In mesh block in input file nx1 must be >= 4, but nx1="
+        << "In mesh block in input file nx1 must be >= 2, but nx1="
         << mesh_size.nx1 << std::endl;
     ATHENA_ERROR(msg);
   }
