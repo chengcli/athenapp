@@ -1,0 +1,37 @@
+diff --git a/src/hydro/calculate_fluxes.cpp b/src/hydro/calculate_fluxes.cpp
+index 4a507986..93c9f09f 100644
+--- a/src/hydro/calculate_fluxes.cpp
++++ b/src/hydro/calculate_fluxes.cpp
+@@ -61,6 +61,7 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
+   //--------------------------------------------------------------------------------------
+   // i-direction
+ 
++#ifndef HYDROSTATIC // only need to calculate x1-fluxes if not hydrostatic
+   AthenaArray<Real> &x1flux = flux[X1DIR];
+   // set the loop limits
+   jl = js, ju = je, kl = ks, ku = ke;
+@@ -157,6 +158,7 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
+   } // end if (order == 4)
+   //------------------------------------------------------------------------------
+   // end x1 fourth-order hydro
++#endif // HYDROSTATIC
+ 
+   //--------------------------------------------------------------------------------------
+   // j-direction
+diff --git a/src/hydro/new_blockdt.cpp b/src/hydro/new_blockdt.cpp
+index 44592082..4149d59a 100644
+--- a/src/hydro/new_blockdt.cpp
++++ b/src/hydro/new_blockdt.cpp
+@@ -110,10 +110,12 @@ void Hydro::NewBlockTimeStep() {
+       }
+ 
+       // compute minimum of (v1 +/- C)
++#ifndef HYDROSTATIC // only need to compute dt1 if not hydrostatic
+       for (int i=is; i<=ie; ++i) {
+         Real& dt_1 = dt1(i);
+         min_dt_hyperbolic = std::min(min_dt_hyperbolic, dt_1);
+       }
++#endif  // HYDROSTATIC
+ 
+       // if grid is 2D/3D, compute minimum of (v2 +/- C)
+       if (pmb->block_size.nx2 > 1) {
