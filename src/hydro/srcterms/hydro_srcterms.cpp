@@ -106,6 +106,10 @@ HydroSourceTerms::HydroSourceTerms(Hydro *phyd, ParameterInput *pin) {
 
   if (SELF_GRAVITY_ENABLED) hydro_sourceterms_defined = true;
 
+  multi_layer_coupling_ = pin->GetOrAddBoolean("hydro",
+    "multi_layer_coupling", false);
+  if (multi_layer_coupling_) hydro_sourceterms_defined = true;
+
   UserSourceTerm = phyd->pmy_block->pmy_mesh->UserSourceTerm_;
   if (UserSourceTerm != nullptr) hydro_sourceterms_defined = true;
 }
@@ -151,6 +155,8 @@ void HydroSourceTerms::AddSourceTerms(const Real time, const Real dt,
     RotatingSystemSourceTerms(dt, flux, prim, cons);
 
   // MyNewSourceTerms()
+  if (multi_layer_coupling_)
+    MultiLayerCoupling(dt, flux, prim, cons);
 
   //  user-defined source terms
   if (UserSourceTerm != nullptr) {
