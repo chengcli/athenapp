@@ -110,10 +110,12 @@ void Hydro::NewBlockTimeStep() {
       }
 
       // compute minimum of (v1 +/- C)
+#ifndef HYDROSTATIC // only need to compute dt1 if not hydrostatic
       for (int i=is; i<=ie; ++i) {
         Real& dt_1 = dt1(i);
         min_dt_hyperbolic = std::min(min_dt_hyperbolic, dt_1);
       }
+#endif  // HYDROSTATIC
 
       // if grid is 2D/3D, compute minimum of (v2 +/- C)
       if (pmb->block_size.nx2 > 1) {
