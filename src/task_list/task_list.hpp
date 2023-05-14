@@ -237,7 +237,7 @@ class TimeIntegratorTaskList : public TaskList {
 
   bool CheckNextMainStage(int stage) const {return stage_wghts[stage%nstages].main_stage;}
 
- private:
+ protected:
   bool ORBITAL_ADVECTION; // flag for orbital advection (true w/ , false w/o)
   bool SHEAR_PERIODIC; // flag for shear periodic boundary (true w/ , false w/o)
   IntegratorWeight stage_wghts[MAX_NSTAGE];
