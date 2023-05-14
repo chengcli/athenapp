@@ -55,6 +55,10 @@ message(STATUS "Find project definitions in src/defs.hpp")
 configure_file(src/defs.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/defs.hpp @ONLY)
 add_subdirectory(src)
 
+## 5. set up project benchmark tests ##
+message(STATUS "5. Set up benchmark tests ...")
+add_subdirectory(bench)
+
 #include_directories(
 #  ${CMAKE_CURRENT_BINARY_DIR}
 #  )

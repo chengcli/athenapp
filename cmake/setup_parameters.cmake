@@ -11,7 +11,7 @@ endmacro()
 
 ## configure.py dict(definitions) string values:
 # problem generator
-SET_IF_EMPTY(PROBLEM "shock_tube")
+SET_IF_EMPTY(PROBLEM "default")
 
 # coordinate system
 SET_IF_EMPTY(COORDINATE_SYSTEM "cartesian")
