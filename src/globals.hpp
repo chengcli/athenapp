@@ -10,6 +10,8 @@
 
 namespace Globals {
 extern int my_rank, nranks;
+extern int next_task_id;
+extern int next_scalar_index;
 }
 
 #endif // GLOBALS_HPP_
