@@ -30,6 +30,7 @@
 #include "../../utils/buffer_utils.hpp"
 #include "../bvals.hpp"
 #include "bvals_cc.hpp"
+#include "../../cubed_sphere.hpp"
 
 // MPI header
 #ifdef MPI_PARALLEL
@@ -297,7 +298,12 @@ int CellCenteredBoundaryVariable::LoadBoundaryBufferSameLevel(Real *buf,
   ek = (nb.ni.ox3 < 0) ? (pmb->ks + NGHOST - 1) : pmb->ke;
   int p = 0;
   AthenaArray<Real> &var = *var_cc;
+#ifdef CUBED_SPHERE
+// nl_, nu_, after buf var
+  PackDataCubedSphere(var, buf, nl_, nu_, si, ei, sj, ej, sk, ek, p, nb.ni.ox1, nb.ni.ox2, nb.ni.ox3, pmb->loc);
+#else
   BufferUtility::PackData(var, buf, nl_, nu_, si, ei, sj, ej, sk, ek, p);
+#endif
   return p;
 }
 
