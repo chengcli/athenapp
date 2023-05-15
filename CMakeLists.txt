@@ -55,6 +55,11 @@ message(STATUS "Find project definitions in src/defs.hpp")
 configure_file(src/defs.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/defs.hpp @ONLY)
 add_subdirectory(src)
 
+set(ATHENAPP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+  CACHE PATH 
+  "athenapp include directory")
+mark_as_advanced(ATHENAPP_INCLUDE_DIR)
+
 ## 5. set up project benchmark tests ##
 message(STATUS "5. Set up benchmark tests ...")
 add_subdirectory(bench)

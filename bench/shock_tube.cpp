@@ -21,15 +21,15 @@
 #include <string>
 
 // Athena++ headers
-#include <athena.hpp>
-#include <athena_arrays.hpp>
-#include <coordinates/coordinates.hpp>
-#include <eos/eos.hpp>
-#include <field/field.hpp>
-#include <hydro/hydro.hpp>
-#include <mesh/mesh.hpp>
-#include <parameter_input.hpp>
-#include <scalars/scalars.hpp>
+#include <athena/athena.hpp>
+#include <athena/athena_arrays.hpp>
+#include <athena/coordinates/coordinates.hpp>
+#include <athena/eos/eos.hpp>
+#include <athena/field/field.hpp>
+#include <athena/hydro/hydro.hpp>
+#include <athena/mesh/mesh.hpp>
+#include <athena/parameter_input.hpp>
+#include <athena/scalars/scalars.hpp>
 
 //========================================================================================
 //! \fn Real press(Real rho, Real T)
