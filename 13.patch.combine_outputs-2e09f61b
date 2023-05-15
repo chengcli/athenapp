@@ -1,0 +1,24 @@
+diff --git a/src/outputs/outputs.cpp b/src/outputs/outputs.cpp
+index b0550c95..b85b3198 100644
+--- a/src/outputs/outputs.cpp
++++ b/src/outputs/outputs.cpp
+@@ -800,6 +800,7 @@ void Outputs::MakeOutputs(Mesh *pm, ParameterInput *pin, bool wtflag) {
+         first = false;
+       }
+       ptype->WriteOutputFile(pm, pin, wtflag);
++      ptype->CombineBlocks();
+     }
+     ptype = ptype->pnext_type; // move to next OutputType node in singly linked list
+   }
+diff --git a/src/outputs/outputs.hpp b/src/outputs/outputs.hpp
+index 9e67c158..db327ef4 100644
+--- a/src/outputs/outputs.hpp
++++ b/src/outputs/outputs.hpp
+@@ -108,6 +108,7 @@ class OutputType {
+   bool ContainVariable(const std::string &haystack, const std::string &needle);
+   // following pure virtual function must be implemented in all derived classes
+   virtual void WriteOutputFile(Mesh *pm, ParameterInput *pin, bool flag) = 0;
++  virtual void CombineBlocks() {}
+ 
+  protected:
+   int num_vars_;             // number of variables in output
