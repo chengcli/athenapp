@@ -63,26 +63,24 @@ file(GLOB src_files
   )
 
 # remove main file
-if (EXISTS "${CMAKE_SOURCE_DIR}/src/main.cpp")
-    list(FILTER src_files EXCLUDE REGEX ".*/src/main\\.cpp$")
-endif()
+list(FILTER src_files EXCLUDE REGEX ".*/src/main\\.cpp$")
 
 # user mod calcualte_fluxes
-if (EXISTS "${CMAKE_SOURCE_DIR}/mod/hydro/calculate_fluxes.cpp")
-    message(STATUS "Found calculate_fluxes.cpp in ${CMAKE_SOURCE_DIR}/mod/hydro/calculate_fluxes.cpp")
-    list(FILTER src_files EXCLUDE REGEX ".*/mod/hydro/calculate_fluxes\\.cpp$")
+if (EXISTS "${CMAKE_SOURCE_DIR}/athena_mod/hydro/calculate_fluxes.cpp")
+    message(STATUS "Found calculate_fluxes.cpp in ${CMAKE_SOURCE_DIR}/athena_mod/hydro/calculate_fluxes.cpp")
+    list(FILTER src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
 endif()
 
 # user mod new_blockdt
-if (EXISTS "${CMAKE_SOURCE_DIR}/mod/hydro/new_blockdt.cpp")
-    message(STATUS "Found new_blockdt.cpp in ${CMAKE_SOURCE_DIR}/mod/hydro/new_blockdt.cpp")
-    list(FILTER src_files EXCLUDE REGEX ".*/mod/hydro/new_blockdt\\.cpp$")
+if (EXISTS "${CMAKE_SOURCE_DIR}/athena_mod/hydro/new_blockdt.cpp")
+    message(STATUS "Found new_blockdt.cpp in ${CMAKE_SOURCE_DIR}/athena_mod/hydro/new_blockdt.cpp")
+    list(FILTER src_files EXCLUDE REGEX ".*/src/hydro/new_blockdt\\.cpp$")
 endif()
 
 # user mod outputs delegates
-if (EXISTS "${CMAKE_SOURCE_DIR}/mod/outputs/outputs.cpp")
-    message(STATUS "Found outputs.cpp in ${CMAKE_SOURCE_DIR}/mod/outputs/outputs.cpp")
-    list(FILTER src_files EXCLUDE REGEX ".*/mod/outputs/outputs\\.cpp$")
+if (EXISTS "${CMAKE_SOURCE_DIR}/athena_mod/outputs/outputs.cpp")
+    message(STATUS "Found outputs.cpp in ${CMAKE_SOURCE_DIR}/athena_mod/outputs/outputs.cpp")
+    list(FILTER src_files EXCLUDE REGEX ".*/src/outputs/outputs\\.cpp$")
 endif()
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} buildl)
