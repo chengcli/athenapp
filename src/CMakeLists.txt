@@ -110,8 +110,3 @@ set(${nameu}_LIBRARY_${buildu} ${namel}_${buildl}
     "{namel} library ${buildu}"
     )
 mark_as_advanced(${nameu}_LIBRARY_${buildu})
-
-set(ATHENAPP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  CACHE PATH 
-  "${namel} include directory")
-mark_as_advanced(ATHENAPP_INCLUDE_DIR)
