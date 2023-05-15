@@ -108,6 +108,7 @@ class OutputType {
   bool ContainVariable(const std::string &haystack, const std::string &needle);
   // following pure virtual function must be implemented in all derived classes
   virtual void WriteOutputFile(Mesh *pm, ParameterInput *pin, bool flag) = 0;
+  virtual void CombineBlocks() {}
 
  protected:
   int num_vars_;             // number of variables in output
