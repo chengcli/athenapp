@@ -800,6 +800,7 @@ void Outputs::MakeOutputs(Mesh *pm, ParameterInput *pin, bool wtflag) {
         first = false;
       }
       ptype->WriteOutputFile(pm, pin, wtflag);
+      ptype->CombineBlocks();
     }
     ptype = ptype->pnext_type; // move to next OutputType node in singly linked list
   }
