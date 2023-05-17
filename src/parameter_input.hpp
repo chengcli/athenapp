@@ -99,15 +99,15 @@ class ParameterInput {
   void RollbackNextTime();
   void ForwardNextTime(Real time);
 
+  InputBlock* GetPtrToBlock(std::string name);
+  void AddParameter(InputBlock *pib, std::string name, std::string value,
+                    std::string comment);
  private:
   std::string last_filename_;  // last input file opened, to prevent duplicate reads
 
   InputBlock* FindOrAddBlock(std::string name);
-  InputBlock* GetPtrToBlock(std::string name);
   void ParseLine(InputBlock *pib, std::string line, std::string& name,
                  std::string& value, std::string& comment);
-  void AddParameter(InputBlock *pib, std::string name, std::string value,
-                    std::string comment);
 
   // thread safety
 #ifdef OPENMP_PARALLEL
