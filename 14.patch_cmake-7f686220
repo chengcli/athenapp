@@ -1,0 +1,61 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 74a45ffc..858431c2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -35,13 +35,13 @@ endif()
+ 
+ ## 1. set up compiler flags ##
+ message(STATUS "1. Set up project compiler flags ...")
+-message(STATUS "Include ${CMAKE_SOURCE_DIR}/cmake/setup_compiler_flags.cmake")
+-include(${CMAKE_SOURCE_DIR}/cmake/setup_compiler_flags.cmake)
++message(STATUS "Include ${CMAKE_SOURCE_DIR}/cmake/compilers.cmake")
++include(${CMAKE_SOURCE_DIR}/cmake/compilers.cmake)
+ 
+ ## 2. set up project specific configuration ##
+ message(STATUS "2. Set up project specific configuration ...")
+-message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake")
+-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup_parameters.cmake)
++message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/parameters.cmake")
++include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/parameters.cmake)
+ 
+ ## 3. set up project system libraries ##
+ message(STATUS "3. Set up project system libraries ...")
+@@ -63,7 +63,3 @@ mark_as_advanced(ATHENAPP_INCLUDE_DIR)
+ ## 5. set up project benchmark tests ##
+ message(STATUS "5. Set up benchmark tests ...")
+ add_subdirectory(bench)
+-
+-#include_directories(
+-#  ${CMAKE_CURRENT_BINARY_DIR}
+-#  )
+diff --git a/cmake/setup_compiler_flags.cmake b/cmake/compilers.cmake
+similarity index 100%
+rename from cmake/setup_compiler_flags.cmake
+rename to cmake/compilers.cmake
+diff --git a/cmake/setup_parameters.cmake b/cmake/parameters.cmake
+similarity index 100%
+rename from cmake/setup_parameters.cmake
+rename to cmake/parameters.cmake
+diff --git a/src/parameter_input.hpp b/src/parameter_input.hpp
+index fee20240..7ff26fa3 100644
+--- a/src/parameter_input.hpp
++++ b/src/parameter_input.hpp
+@@ -99,15 +99,15 @@ class ParameterInput {
+   void RollbackNextTime();
+   void ForwardNextTime(Real time);
+ 
++  InputBlock* GetPtrToBlock(std::string name);
++  void AddParameter(InputBlock *pib, std::string name, std::string value,
++                    std::string comment);
+  private:
+   std::string last_filename_;  // last input file opened, to prevent duplicate reads
+ 
+   InputBlock* FindOrAddBlock(std::string name);
+-  InputBlock* GetPtrToBlock(std::string name);
+   void ParseLine(InputBlock *pib, std::string line, std::string& name,
+                  std::string& value, std::string& comment);
+-  void AddParameter(InputBlock *pib, std::string name, std::string value,
+-                    std::string comment);
+ 
+   // thread safety
+ #ifdef OPENMP_PARALLEL
