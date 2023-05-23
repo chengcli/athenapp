@@ -62,4 +62,6 @@ mark_as_advanced(ATHENAPP_INCLUDE_DIR)
 
 ## 5. set up project benchmark tests ##
 message(STATUS "5. Set up benchmark tests ...")
-add_subdirectory(bench)
+if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+  add_subdirectory(bench)
+endif()
