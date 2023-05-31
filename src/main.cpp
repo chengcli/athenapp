@@ -109,6 +109,13 @@ int main(int argc, char *argv[]) {
     MPI_Finalize();
     return(0);
   }
+
+  // Get maximum value of MPI tag
+  MPI_Aint* tag_ub_ptr;
+  int att_flag;
+  MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &tag_ub_ptr, &att_flag);
+  Globals::mpi_tag_ub = *tag_ub_ptr;
+  
 #else  // no MPI
   Globals::my_rank = 0;
   Globals::nranks  = 1;

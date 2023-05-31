@@ -22,6 +22,7 @@ namespace Globals {
 // all of these global variables are set at the start of main():
 int my_rank;         // MPI rank of this process
 int nranks;          // total number of MPI ranks
+int mpi_tag_ub;		// upper bound on MPI tags
 int next_task_id = 69;  // next available task id (last item of task_list)
 int next_scalar_index = 0;  // next available scalar index
 }
