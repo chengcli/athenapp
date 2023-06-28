@@ -1,0 +1,27 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 0cd07369..a6f27765 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -87,7 +87,7 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} buildl)
+ string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
+ 
+ add_library(${namel}_${buildl} 
+-    OBJECT 
++    STATIC
+     ${src_files}
+     )
+ 
+diff --git a/src/mesh/mesh.hpp b/src/mesh/mesh.hpp
+index 4144da63..01ff45d5 100644
+--- a/src/mesh/mesh.hpp
++++ b/src/mesh/mesh.hpp
+@@ -143,6 +143,9 @@ class MeshBlock {
+   void UserWorkInLoop();                          // called in TimeIntegratorTaskList
+ 
+   // opaque pointer
++  class IndexMap;
++  std::shared_ptr<IndexMap> pindex;
++
+   class Impl;
+   std::shared_ptr<Impl> pimpl;
+ 
