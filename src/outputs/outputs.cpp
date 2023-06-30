@@ -272,7 +272,7 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
           ATHENA_ERROR(msg);
 #endif
         } else if (op.file_type.compare("netcdf") == 0) {
-#ifdef NETCDF_OUTPUT
+#ifdef NETCDFOUTPUT
           pnew_type = new NetcdfOutput(op);
 #else
           msg << "### FATAL ERROR in Outputs constructor" << std::endl
@@ -281,7 +281,7 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
           ATHENA_ERROR(msg);
 #endif
         } else if (op.file_type.compare("pnetcdf") == 0) {
-#ifdef PNETCDF_OUTPUT
+#ifdef PNETCDFOUTPUT
           pnew_type = new PnetcdfOutput(op);
 #else
           msg << "### FATAL ERROR in Outputs constructor" << std::endl
@@ -290,7 +290,7 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
           ATHENA_ERROR(msg);
 #endif
         } else if (op.file_type.compare("fits") == 0) {
-#ifdef FITS_OUTPUT
+#ifdef FITSOUTPUT
           pnew_type = new FITSOutput(op);
 #else
           msg << "### FATAL ERROR in Outputs constructor" << std::endl
