@@ -106,6 +106,18 @@
 // CVODE solver (CVODE or NO_CVODE)
 #define @CVODE_OPTION@
 
+// NetCDF output (NETCDFOUTPUT or NO_NETCDFOUTPUT)
+#define @NETCDF_OPTION@
+
+// PNetCDF output (PNETCDFOUTPUT or NO_PNETCDFOUTPUT)
+#define @PNETCDF_OPTION@
+
+// FITS output (FITSOUTPUT or NO_FITSOUTPUT)
+#define @FITS_OPTION@
+
+// debug build macros (DEBUG or NOT_DEBUG)
+#define @DEBUG_OPTION@
+
 // try/throw/catch C++ exception handling (ENABLE_EXCEPTIONS or DISABLE_EXCEPTIONS)
 // (enabled by default)
 #define @EXCEPTION_HANDLING_OPTION@
