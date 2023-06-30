@@ -98,6 +98,7 @@
 #include "../parameter_input.hpp"
 #include "../scalars/scalars.hpp"
 #include "outputs.hpp"
+#include "user_outputs.hpp"
 
 //----------------------------------------------------------------------------------------
 //! OutputType constructor
@@ -268,6 +269,37 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
               << "is requested in output block '" << op.block_name << "'" << std::endl;
           ATHENA_ERROR(msg);
 #endif
+        } else if (op.file_type.compare("netcdf") == 0) {
+#ifdef NETCDF_OUTPUT
+          pnew_type = new NetcdfOutput(op);
+#else
+          msg << "### FATAL ERROR in Outputs constructor" << std::endl
+              << "Executable not configured for NETCDF outputs, but NETCDF file format "
+              << "is requested in output block '" << op.block_name << "'" << std::endl;
+          ATHENA_ERROR(msg);
+#endif
+        } else if (op.file_type.compare("pnetcdf") == 0) {
+#ifdef PNETCDF_OUTPUT
+          pnew_type = new PnetcdfOutput(op);
+#else
+          msg << "### FATAL ERROR in Outputs constructor" << std::endl
+              << "Executable not configured for PNETCDF outputs, but PNETCDF file format "
+              << "is requested in output block '" << op.block_name << "'" << std::endl;
+          ATHENA_ERROR(msg);
+#endif
+        } else if (op.file_type.compare("fits") == 0) {
+#ifdef FITS_OUTPUT
+          pnew_type = new FITSOutput(op);
+#else
+          msg << "### FATAL ERROR in Outputs constructor" << std::endl
+              << "Executable not configured for FITS outputs, but FITS file format "
+              << "is requested in output block '" << op.block_name << "'" << std::endl;
+          ATHENA_ERROR(msg);
+#endif
+        } else if (op.file_type.compare("dbg") == 0) {
+          pnew_type = new DebugOutput(op);
+        //} else if (op.file_type.compare("ptab") == 0) {
+        //  pnew_type = new ParticlesTableOutput(op);
         } else {
           msg << "### FATAL ERROR in Outputs constructor" << std::endl
               << "Unrecognized file format = '" << op.file_type
