@@ -75,6 +75,15 @@
 // HDF5 output (HDF5OUTPUT or NO_HDF5OUTPUT)
 #define @HDF5_OPTION@
 
+// NetCDF output (NETCDFOUTPUT or NO_NETCDFOUTPUT)
+#define @NETCDF_OPTION@
+
+// PNetCDF output (PNETCDFOUTPUT or NO_PNETCDFOUTPUT)
+#define @PNETCDF_OPTION@
+
+// FITS output (FITSOUTPUT or NO_FITSOUTPUT)
+#define @FITS_OPTION@
+
 // debug build macros (DEBUG or NOT_DEBUG)
 #define @DEBUG_OPTION@
 
