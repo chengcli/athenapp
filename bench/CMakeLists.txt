@@ -5,7 +5,7 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} buildl)
 string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
 
 # compile shock_tube.cpp
-add_executable(shock_tube.${buildl} main.cpp shock_tube.cpp)
+add_executable(shock_tube.${buildl} main.cpp shock_tube.cpp dummy.cpp)
 
 set_target_properties(shock_tube.${buildl}
 	PROPERTIES
