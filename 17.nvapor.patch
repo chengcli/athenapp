@@ -1,0 +1,38 @@
+diff --git a/cmake/parameters.cmake b/cmake/parameters.cmake
+index 97231806..8fbe9f8a 100644
+--- a/cmake/parameters.cmake
++++ b/cmake/parameters.cmake
+@@ -95,9 +95,15 @@ string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+ SET_IF_EMPTY(COMPILER_FLAGS ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
+ 
+ # macros associated with numerical algorithm (rarely modified)
+-SET_IF_EMPTY(NHYDRO_VARIABLES 5)
++SET_IF_EMPTY(NVAPOR 0)
+ SET_IF_EMPTY(NFIELD_VARIABLES 0)
+-SET_IF_EMPTY(NWAVE_VALUE 5)
+-SET_IF_EMPTY(NUMBER_PASSIVE_SCALARS 0)
+ SET_IF_EMPTY(NUMBER_GHOST_CELLS 2)
+-SET_IF_EMPTY(NVAPOR_VARIABLES 0)
++
++math(EXPR NHYDRO_VARIABLES "5 + ${NVAPOR}")
++math(EXPR NWAVE_VALUE "5 + ${NVAPOR}")
++
++SET_IF_EMPTY(NCLOUDS 0)
++SET_IF_EMPTY(NTRACER 0)
++SET_IF_EMPTY(NCHEMISTRY 0)
++
++math(EXPR NUMBER_PASSIVE_SCALARS "${NCLOUDS} + ${NTRACER} + ${NCHEMISTRY}")
+diff --git a/src/defs.hpp.in b/src/defs.hpp.in
+index 5b2dd860..667181b7 100644
+--- a/src/defs.hpp.in
++++ b/src/defs.hpp.in
+@@ -99,8 +99,8 @@
+ //----------------------------------------------------------------------------------------
+ // macros associated with numerical algorithm (rarely modified)
+ 
++#define NVAPOR @NVAPOR@
+ #define NHYDRO @NHYDRO_VARIABLES@
+-#define NVAPOR @NVAPOR_VARIABLES@
+ #define NFIELD @NFIELD_VARIABLES@
+ #define NWAVE @NWAVE_VALUE@
+ #define NSCALARS @NUMBER_PASSIVE_SCALARS@
