@@ -111,6 +111,8 @@ class OutputType {
   virtual void CombineBlocks() {}
 
  protected:
+  void loadUserOutputData(MeshBlock *pmb);
+
   int num_vars_;             // number of variables in output
   // nested doubly linked list of OutputData nodes (of the same OutputType):
   OutputData *pfirst_data_;  // ptr to head OutputData node in doubly linked list

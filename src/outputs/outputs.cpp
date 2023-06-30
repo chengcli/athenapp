@@ -742,6 +742,8 @@ void OutputType::LoadOutputData(MeshBlock *pmb) {
     }
   }
 
+  loadUserOutputData(pmb);
+
   // throw an error if output variable name not recognized
   if (num_vars_ == 0) {
     std::stringstream msg;
