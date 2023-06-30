@@ -15,3 +15,6 @@ void PnetcdfOutput::WriteOutputFile(Mesh *pm, ParameterInput *pin, bool flag)
 
 void FITSOutput::WriteOutputFile(Mesh *pm, ParameterInput *pin, bool flag)
 {}
+
+void OutputType::loadUserOutputData(MeshBlock *pmb)
+{}
