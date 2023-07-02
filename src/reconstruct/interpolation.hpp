@@ -1,5 +1,9 @@
 #ifndef SRC_RECONSTRUCT_INTERPOLATION_HPP_
 #define SRC_RECONSTRUCT_INTERPOLATION_HPP_
+// C/C++
+#include <algorithm>
+
+// Athena++
 #include "../defs.hpp"
 //#include "../math/core.h"
 
