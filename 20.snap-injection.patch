@@ -1,0 +1,30 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index a6f27765..ecdb67f3 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,5 +1,11 @@
+ # Creates athenapp library
+ 
++include_directories(
++  ${CMAKE_SOURCE_DIR}/src
++  ${CMAKE_CURRENT_SOURCE_DIR}/..
++  ${CMAKE_BINARY_DIR}
++  )
++
+ set(namel athenapp)
+ string(TOUPPER ${namel} nameu)
+ 
+diff --git a/src/reconstruct/interpolation.hpp b/src/reconstruct/interpolation.hpp
+index 0587bba9..6162a7c1 100644
+--- a/src/reconstruct/interpolation.hpp
++++ b/src/reconstruct/interpolation.hpp
+@@ -1,5 +1,9 @@
+ #ifndef SRC_RECONSTRUCT_INTERPOLATION_HPP_
+ #define SRC_RECONSTRUCT_INTERPOLATION_HPP_
++// C/C++
++#include <algorithm>
++
++// Athena++
+ #include "../defs.hpp"
+ //#include "../math/core.h"
+ 
