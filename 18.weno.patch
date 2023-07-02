@@ -1,0 +1,611 @@
+diff --git a/src/globals.cpp b/src/globals.cpp
+index 1f2271fb..fd5c2560 100644
+--- a/src/globals.cpp
++++ b/src/globals.cpp
+@@ -22,7 +22,4 @@ namespace Globals {
+ // all of these global variables are set at the start of main():
+ int my_rank;         // MPI rank of this process
+ int nranks;          // total number of MPI ranks
+-int mpi_tag_ub;		// upper bound on MPI tags
+-int next_task_id = 69;  // next available task id (last item of task_list)
+-int next_scalar_index = 0;  // next available scalar index
+ }
+diff --git a/src/globals.hpp b/src/globals.hpp
+index 88cec268..426a70ae 100644
+--- a/src/globals.hpp
++++ b/src/globals.hpp
+@@ -10,9 +10,6 @@
+ 
+ namespace Globals {
+ extern int my_rank, nranks;
+-extern int next_task_id;
+-extern int next_scalar_index;
+-extern int mpi_tag_ub;
+ }
+ 
+ #endif // GLOBALS_HPP_
+diff --git a/src/hydro/calculate_fluxes.cpp b/src/hydro/calculate_fluxes.cpp
+index 93c9f09f..eeaf381b 100644
+--- a/src/hydro/calculate_fluxes.cpp
++++ b/src/hydro/calculate_fluxes.cpp
+@@ -81,6 +81,10 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
+         pmb->precon->DonorCellX1(k, j, is-1, ie+1, w, bcc, wl_, wr_);
+       } else if (order == 2) {
+         pmb->precon->PiecewiseLinearX1(k, j, is-1, ie+1, w, bcc, wl_, wr_);
++      } else if (order == 3) {
++        pmb->precon->Weno3X1(k, j, is-1, ie+1, w, bcc, wl_, wr_);
++      } else if (order == 5) {
++        pmb->precon->Weno5X1(k, j, is-1, ie+1, w, bcc, wl_, wr_);
+       } else {
+         pmb->precon->PiecewiseParabolicX1(k, j, is-1, ie+1, w, bcc, wl_, wr_);
+       }
+@@ -180,6 +184,10 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
+         pmb->precon->DonorCellX2(k, js-1, il, iu, w, bcc, wl_, wr_);
+       } else if (order == 2) {
+         pmb->precon->PiecewiseLinearX2(k, js-1, il, iu, w, bcc, wl_, wr_);
++      } else if (order == 3) {
++        pmb->precon->Weno3X2(k, js-1, il, iu, w, bcc, wl_, wr_);
++      } else if (order == 5) {
++        pmb->precon->Weno5X2(k, js-1, il, iu, w, bcc, wl_, wr_);
+       } else {
+         pmb->precon->PiecewiseParabolicX2(k, js-1, il, iu, w, bcc, wl_, wr_);
+       }
+@@ -189,6 +197,10 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
+           pmb->precon->DonorCellX2(k, j, il, iu, w, bcc, wlb_, wr_);
+         } else if (order == 2) {
+           pmb->precon->PiecewiseLinearX2(k, j, il, iu, w, bcc, wlb_, wr_);
++        } else if (order == 3) {
++          pmb->precon->Weno3X2(k, j, il, iu, w, bcc, wlb_, wr_);
++        } else if (order == 5) {
++          pmb->precon->Weno5X2(k, j, il, iu, w, bcc, wlb_, wr_);
+         } else {
+           pmb->precon->PiecewiseParabolicX2(k, j, il, iu, w, bcc, wlb_, wr_);
+         }
+@@ -286,6 +298,10 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
+         pmb->precon->DonorCellX3(ks-1, j, il, iu, w, bcc, wl_, wr_);
+       } else if (order == 2) {
+         pmb->precon->PiecewiseLinearX3(ks-1, j, il, iu, w, bcc, wl_, wr_);
++      } else if (order == 3) {
++        pmb->precon->Weno3X3(ks-1, j, il, iu, w, bcc, wl_, wr_);
++      } else if (order == 5) {
++        pmb->precon->Weno5X3(ks-1, j, il, iu, w, bcc, wl_, wr_);
+       } else {
+         pmb->precon->PiecewiseParabolicX3(ks-1, j, il, iu, w, bcc, wl_, wr_);
+       }
+@@ -295,6 +311,10 @@ void Hydro::CalculateFluxes(AthenaArray<Real> &w, FaceField &b,
+           pmb->precon->DonorCellX3(k, j, il, iu, w, bcc, wlb_, wr_);
+         } else if (order == 2) {
+           pmb->precon->PiecewiseLinearX3(k, j, il, iu, w, bcc, wlb_, wr_);
++        } else if (order == 3) {
++          pmb->precon->Weno3X3(k, j, il, iu, w, bcc, wlb_, wr_);
++        } else if (order == 5) {
++          pmb->precon->Weno5X3(k, j, il, iu, w, bcc, wlb_, wr_);
+         } else {
+           pmb->precon->PiecewiseParabolicX3(k, j, il, iu, w, bcc, wlb_, wr_);
+         }
+diff --git a/src/main.cpp b/src/main.cpp
+index b0381d00..04d74465 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -109,13 +109,6 @@ int main(int argc, char *argv[]) {
+     MPI_Finalize();
+     return(0);
+   }
+-
+-  // Get maximum value of MPI tag
+-  MPI_Aint* tag_ub_ptr;
+-  int att_flag;
+-  MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &tag_ub_ptr, &att_flag);
+-  Globals::mpi_tag_ub = *tag_ub_ptr;
+-  
+ #else  // no MPI
+   Globals::my_rank = 0;
+   Globals::nranks  = 1;
+diff --git a/src/reconstruct/interpolation.hpp b/src/reconstruct/interpolation.hpp
+new file mode 100644
+index 00000000..0587bba9
+--- /dev/null
++++ b/src/reconstruct/interpolation.hpp
+@@ -0,0 +1,156 @@
++#ifndef SRC_RECONSTRUCT_INTERPOLATION_HPP_
++#define SRC_RECONSTRUCT_INTERPOLATION_HPP_
++#include "../defs.hpp"
++//#include "../math/core.h"
++
++#define sqr(x) ( (x)*(x) )
++
++/* 2-nd order plm for non-uniform grid
++template<typename T>
++inline T interp_plm(T phim1, T phi, T phip1, Real dxl, Real dx) {
++  Real dwl = phi - phim1;
++  Real dwr = phip1 - phi;
++  Real dw2 = dwl*dwr;
++  Real dwm = 2.0*dw2/(dwl + dwr);
++  if (dw2 <= 0.0) dwm = 0.0;
++  return phi - dxl/dx*dwm;
++}*/
++
++// limiter
++template<typename T>
++inline T minmod(T a, T b) {
++  return a*std::max(0., std::min(1., b/a));
++}
++
++template<typename T>
++inline T superbee(T a, T b) {
++  T r = b/a;
++  return a*std::max(0., std::min(1., 2.*r), std::min(2., r));
++}
++
++template<typename T>
++inline T vanleer(T a, T b) {
++  T r = b/a;
++  return a*(r + fabs(r))/(1. + fabs(r));
++}
++
++template<typename T>
++inline T mclimiter(T a, T b) {
++  T r = b/a;
++  T c = (1. + r)/2.;
++  return std::max(0., std::min(std::min(c, 2.), 2.*r));
++}
++
++// sign
++template <typename T> 
++inline int sign(T val) {
++  return (T(0) < val) - (val < T(0));
++}
++
++// 2-rd polynomial 
++template<typename T>
++inline T interp_cp2(T phim1, T phi) {
++  return 0.5*phim1 + 0.5*phi;
++}
++
++// 1-rd upwind-biased polynomial 
++template<typename T>
++inline T interp_bp2(T phim1, T phi, int sgn) {
++  T phih = interp_cp2(phim1, phi);
++  T phid = 0.5*(phi - phim1);
++  return phih - sgn*phid;
++}
++
++// 3-th polynomial 
++template<typename T>
++inline T interp_cp3(T phim1, T phi, T phip1) {
++  return 1./3.*phim1 + 5./6.*phi - 1./6.*phip1;
++};
++
++// 4-th polynomial 
++template<typename T>
++inline T interp_cp4(T phim2, T phim1, T phi, T phip1) {
++  return -1./12.*phim2 + 7./12.*phim1 + 7./12.*phi - 1./12.*phip1;
++};
++
++// 3-rd upwind-biased polynomial 
++template<typename T>
++inline T interp_bp3(T phim2, T phim1, T phi, T phip1, int sgn) {
++  T phih = interp_cp4(phim2, phim1, phi, phip1);
++  T phid = ((phip1 - phim2) - 3.*(phi - phim1))/12.;
++  return phih + sgn*phid;
++}
++
++// WENO 3 interpolation
++template<typename T>
++inline T interp_weno3(T const& phim1, T const& phi, T const& phip1) {
++  T p0 = (1.0/2.0)*phi + (1.0/2.0)*phim1;
++  T p1 = (-1.0/2.0)*phip1 + (3.0/2.0)*phi;
++
++  T beta0 = (phim1 - phi)*(phim1 - phi);
++  T beta1 = (phi - phip1)*(phi - phip1);
++
++  T alpha0 = (1.0/3.0)/sqr(beta0 + 1e-10);
++  T alpha1 = (2.0/3.0)/sqr(beta1 + 1e-10);
++
++  return (alpha0*p0 + alpha1*p1)/(alpha0 + alpha1);
++};
++
++// 5-th polynomial 
++template<typename T>
++inline T interp_cp5(T const& phim2, T const& phim1, T const& phi, T const& phip1, T
++const& phip2) {
++  return -1./20.*phim2 + 9./20.*phim1 + 47./60.*phi - 13./60.*phip1 + 1./30.*phip2;
++};
++
++// 6-th polynomial 
++template<typename T>
++inline T interp_cp6(T phim3, T phim2, T phim1, T phi, T phip1, T phip2) {
++  return 1./60.*phim3 - 2./15.*phim2 + 37./60.*phim1 + 37./60.*phi - 2./15.*phip1 + 1./60.*phip2;
++};
++
++// 5-th upwind-biased polynomial 
++template<typename T>
++inline T interp_bp5(T phim3, T phim2, T phim1, T phi, T phip1, T phip2, int sgn) {
++  T phih = interp_cp6(phim3, phim2, phim1, phi, phip1, phip2);
++  T phid = ((phip2 - phim3) - 5.*(phip1 - phim2) + 10.*(phi - phim1))/60.;
++  return phih - sgn*phid;
++};
++
++// WENO 5 interpolation
++template<typename T>
++inline T interp_weno5(T const& phim2, T const& phim1, T const& phi, T const& phip1, T const& phip2) {
++  T p0 = (1./3.)*phi + (5./6.)*phim1 - (1./6.)*phim2;
++  T p1 = (-1./6.)*phip1 + (5./6.)*phi + (1./3.)*phim1;
++  T p2 = (1./3.)*phip2 - (7./6.)*phip1 + (11./6.)*phi;
++
++  T beta0 = 13./12.*sqr(phi - 2.*phim1 + phim2) + .25*sqr(3.*phi - 4.*phim1 + phim2);
++  T beta1 = 13./12.*sqr(phip1 - 2.*phi + phim1) + .25*sqr(phip1 - phim1);
++  T beta2 = 13./12.*sqr(phip2 - 2.*phip1 + phi) + .25*sqr(phip2 - 4.*phip1 + 3.*phi);
++
++  T alpha0 = .3/sqr(beta0 + 1e-10);
++  T alpha1 = .6/sqr(beta1 + 1e-10);
++  T alpha2 = .1/sqr(beta2 + 1e-10);
++
++  return (alpha0*p0 + alpha1*p1 + alpha2*p2)/(alpha0 + alpha1 + alpha2);
++};
++
++// 3rd order polynomial with inflection point
++template<typename T>
++inline T inflection3_cell1(T f1, T f2, T f3) {
++  return 7./3.*f1 - 5./3.*f2 + 1./3.*f3;
++}
++
++template<typename T>
++inline T inflection3_cell2(T f1, T f2, T f3) {
++  return 10./3.*f1 - 8./3.*f2 + 1./3.*f3;
++}
++
++template<typename T>
++inline T inflection3_cell3(T f1, T f2, T f3) {
++  return 10./3.*f1 - 5./3.*f2 - 2./3.*f3;
++}
++
++#undef sqr
++
++#endif
+diff --git a/src/reconstruct/reconstruction.hpp b/src/reconstruct/reconstruction.hpp
+index 410bb8f1..2450e6b4 100644
+--- a/src/reconstruct/reconstruction.hpp
++++ b/src/reconstruct/reconstruction.hpp
+@@ -129,6 +129,50 @@ class Reconstruction {
+                             const AthenaArray<Real> &q,
+                             AthenaArray<Real> &ql, AthenaArray<Real> &qr);
+ 
++  // weno reconstruction functions of various orders in each dimension
++  void Weno3X1(const int k, const int j, const int il, const int iu, 
++               const AthenaArray<Real> &w, const AthenaArray<Real> &bcc, 
++               AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno3X2(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++               AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno3X3(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++               AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno5X1(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++               AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno5X2(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++               AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno5X3(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++               AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  // overloads for non-fluid (cell-centered Hydro prim. and magnetic field) reconstruction
++  void Weno3X1(const int k, const int j, const int il, const int iu, 
++               const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno3X2(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno3X3(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno5X1(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno5X2(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
++  void Weno5X3(const int k, const int j, const int il, const int iu,
++               const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
++
+  private:
+   MeshBlock* pmy_block_;  // ptr to MeshBlock containing this Reconstruction
+ 
+diff --git a/src/reconstruct/weno3.cpp b/src/reconstruct/weno3.cpp
+new file mode 100644
+index 00000000..7f8d06dd
+--- /dev/null
++++ b/src/reconstruct/weno3.cpp
+@@ -0,0 +1,52 @@
++// Athena++ headers
++#include "../athena.hpp"
++#include "../athena_arrays.hpp"
++#include "../hydro/hydro.hpp"
++#include "../mesh/mesh.hpp"
++#include "reconstruction.hpp"
++#include "interpolation.hpp"
++
++void Reconstruction::Weno3X1(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++  AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<(NHYDRO); ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i){
++      wl(n,i) = interp_weno3(w(n,k,j,i+1), w(n,k,j,i), w(n,k,j,i-1));
++      wr(n,i) = interp_weno3(w(n,k,j,i-1), w(n,k,j,i), w(n,k,j,i+1));
++    }
++  }
++
++  return;
++}
++
++void Reconstruction::Weno3X2(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++  AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<(NHYDRO); ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i){
++      wl(n,i) = interp_weno3(w(n,k,j+1,i), w(n,k,j,i), w(n,k,j-1,i));
++      wr(n,i) = interp_weno3(w(n,k,j-1,i), w(n,k,j,i), w(n,k,j+1,i));
++    }
++  }
++
++  return;
++}
++
++void Reconstruction::Weno3X3(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++  AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<NHYDRO; ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i){
++      wl(n,i) = interp_weno3(w(n,k+1,j,i), w(n,k,j,i), w(n,k-1,j,i));
++      wr(n,i) = interp_weno3(w(n,k-1,j,i), w(n,k,j,i), w(n,k+1,j,i));
++    }
++  }
++
++  return;
++}
+diff --git a/src/reconstruct/weno3_simple.cpp b/src/reconstruct/weno3_simple.cpp
+new file mode 100644
+index 00000000..d96e34f2
+--- /dev/null
++++ b/src/reconstruct/weno3_simple.cpp
+@@ -0,0 +1,49 @@
++// Athena++ headers
++#include "../athena.hpp"
++#include "../athena_arrays.hpp"
++#include "../hydro/hydro.hpp"
++#include "../mesh/mesh.hpp"
++#include "reconstruction.hpp"
++#include "interpolation.hpp"
++
++void Reconstruction::Weno3X1(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<w.GetDim4(); ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i){
++      wl(n,i) = interp_weno3(w(n,k,j,i+1), w(n,k,j,i), w(n,k,j,i-1));
++      wr(n,i) = interp_weno3(w(n,k,j,i-1), w(n,k,j,i), w(n,k,j,i+1));
++    }
++  }
++
++  return;
++}
++
++void Reconstruction::Weno3X2(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<w.GetDim4(); ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i){
++      wl(n,i) = interp_weno3(w(n,k,j+1,i), w(n,k,j,i), w(n,k,j-1,i));
++      wr(n,i) = interp_weno3(w(n,k,j-1,i), w(n,k,j,i), w(n,k,j+1,i));
++    }
++  }
++
++  return;
++}
++
++void Reconstruction::Weno3X3(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<w.GetDim4(); ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i){
++      wl(n,i) = interp_weno3(w(n,k+1,j,i), w(n,k,j,i), w(n,k-1,j,i));
++      wr(n,i) = interp_weno3(w(n,k-1,j,i), w(n,k,j,i), w(n,k+1,j,i));
++    }
++  }
++
++  return;
++}
+diff --git a/src/reconstruct/weno5.cpp b/src/reconstruct/weno5.cpp
+new file mode 100644
+index 00000000..b3f6565e
+--- /dev/null
++++ b/src/reconstruct/weno5.cpp
+@@ -0,0 +1,120 @@
++// Athena++ headers
++#include "../athena.hpp"
++#include "../athena_arrays.hpp"
++#include "../hydro/hydro.hpp"
++#include "../mesh/mesh.hpp"
++#include "reconstruction.hpp"
++#include "interpolation.hpp"
++
++void Reconstruction::Weno5X1(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++  AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  MeshBlock *pmb = pmy_block_;
++  for (int n=0; n<=NVAPOR; ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i) {
++      Real scale = 0.;
++      for (int m = -2; m <= 2; ++m) scale += (w(n,k,j,i+m) + 1.E-16)/5.;
++      wl(n,i+1) = interp_weno5(w(n,k,j,i+2)/scale, w(n,k,j,i+1)/scale, w(n,k,j,i)/scale,
++                               w(n,k,j,i-1)/scale, w(n,k,j,i-2)/scale);
++      wl(n,i+1) *= scale;
++      wr(n,i) = interp_weno5(w(n,k,j,i-2)/scale, w(n,k,j,i-1)/scale, w(n,k,j,i)/scale,
++                             w(n,k,j,i+1)/scale, w(n,k,j,i+2)/scale);
++      wr(n,i) *= scale;
++    }
++  }
++
++  int ng1 = 0, ng2 = 0;
++  if (pmb->pbval->block_bcs[inner_x1] != BoundaryFlag::block)
++    ng1 = NGHOST;
++  if (pmb->pbval->block_bcs[outer_x1] != BoundaryFlag::block)
++    ng2 = NGHOST;
++
++  for (int n=IVX; n<NHYDRO; ++n) {
++    // left boundary
++    for (int i=il; i<il+ng1; ++i) {
++      wl(n,i+1) = interp_weno5(w(n,k,j,i+2),w(n,k,j,i+1),w(n,k,j,i),w(n,k,j,i-1),w(n,k,j,i-2));
++      wr(n,i  ) = interp_weno5(w(n,k,j,i-2),w(n,k,j,i-1),w(n,k,j,i),w(n,k,j,i+1),w(n,k,j,i+2));
++    }
++
++    // interior
++#pragma omp simd
++    for (int i=il+ng1; i<=iu-ng2; ++i) {
++      wl(n,i+1) = interp_cp5(w(n,k,j,i+2),w(n,k,j,i+1),w(n,k,j,i),w(n,k,j,i-1),w(n,k,j,i-2));
++      wr(n,i  ) = interp_cp5(w(n,k,j,i-2),w(n,k,j,i-1),w(n,k,j,i),w(n,k,j,i+1),w(n,k,j,i+2));
++    }
++
++    // right boundary
++    for (int i=iu-ng2+1; i<=iu; ++i) {
++      wl(n,i+1) = interp_weno5(w(n,k,j,i+2),w(n,k,j,i+1),w(n,k,j,i),w(n,k,j,i-1),w(n,k,j,i-2));
++      wr(n,i  ) = interp_weno5(w(n,k,j,i-2),w(n,k,j,i-1),w(n,k,j,i),w(n,k,j,i+1),w(n,k,j,i+2));
++    }
++  }
++
++  return;
++}
++
++//----------------------------------------------------------------------------------------
++//! \fn Reconstruction::Weno5X2()
++//  \brief 
++
++void Reconstruction::Weno5X2(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++  AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<=NVAPOR; ++n) {
++    for (int i=il; i<=iu; ++i) {
++      Real scale = 0.;
++      for (int m = -2; m <= 2; ++m) scale += (w(n,k,j+m,i) + 1.E-16)/5.;
++      wl(n,i) = interp_weno5(w(n,k,j+2,i)/scale, w(n,k,j+1,i)/scale, w(n,k,j,i)/scale,
++                             w(n,k,j-1,i)/scale, w(n,k,j-2,i)/scale);
++      wl(n,i) *= scale;
++      wr(n,i) = interp_weno5(w(n,k,j-2,i)/scale, w(n,k,j-1,i)/scale, w(n,k,j,i)/scale,
++                             w(n,k,j+1,i)/scale, w(n,k,j+2,i)/scale);
++      wr(n,i) *= scale;
++    }
++  }
++
++  for (int n=IVX; n<NHYDRO; ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i) {
++      wl(n,i) = interp_cp5(w(n,k,j+2,i),w(n,k,j+1,i),w(n,k,j,i),w(n,k,j-1,i),w(n,k,j-2,i));
++      wr(n,i) = interp_cp5(w(n,k,j-2,i),w(n,k,j-1,i),w(n,k,j,i),w(n,k,j+1,i),w(n,k,j+2,i));
++    }
++  }
++
++  return;
++}
++
++//----------------------------------------------------------------------------------------
++//! \fn Reconstruction::Weno5X3()
++//  \brief 
++
++void Reconstruction::Weno5X3(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
++  AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<=NVAPOR; ++n) {
++    for (int i=il; i<=iu; ++i) {
++      Real scale = 0.;
++      for (int m = -2; m <= 2; ++m) scale += (w(n,k+m,j,i) + 1.E-16)/5.;
++      wl(n,i) = interp_weno5(w(n,k+2,j,i)/scale, w(n,k+1,j,i)/scale, w(n,k,j,i)/scale,
++                             w(n,k-1,j,i)/scale, w(n,k-2,j,i)/scale);
++      wl(n,i) *= scale;
++      wr(n,i) = interp_weno5(w(n,k-2,j,i)/scale, w(n,k-1,j,i)/scale, w(n,k,j,i)/scale,
++                             w(n,k+1,j,i)/scale, w(n,k+2,j,i)/scale);
++      wr(n,i) *= scale;
++    }
++  }
++
++  for (int n=IVX; n<NHYDRO; ++n) {
++#pragma omp simd
++    for (int i=il; i<=iu; ++i) {
++      wl(n,i) = interp_cp5(w(n,k+2,j,i),w(n,k+1,j,i),w(n,k,j,i),w(n,k-1,j,i),w(n,k-2,j,i));
++      wr(n,i) = interp_cp5(w(n,k-2,j,i),w(n,k-1,j,i),w(n,k,j,i),w(n,k+1,j,i),w(n,k+2,j,i));
++    }
++  }
++
++  return;
++}
+diff --git a/src/reconstruct/weno5_simple.cpp b/src/reconstruct/weno5_simple.cpp
+new file mode 100644
+index 00000000..2ee0bf55
+--- /dev/null
++++ b/src/reconstruct/weno5_simple.cpp
+@@ -0,0 +1,46 @@
++// Athena++ headers
++#include "../athena.hpp"
++#include "../athena_arrays.hpp"
++#include "../hydro/hydro.hpp"
++#include "../mesh/mesh.hpp"
++#include "reconstruction.hpp"
++#include "interpolation.hpp"
++
++void Reconstruction::Weno5X1(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<w.GetDim4(); ++n) 
++#pragma omp simd
++    for (int i=il; i<=iu; ++i) {
++      wl(n,i+1) = interp_weno5(w(n,k,j,i+2),w(n,k,j,i+1),w(n,k,j,i),w(n,k,j,i-1),w(n,k,j,i-2));
++      wr(n,i) = interp_weno5(w(n,k,j,i-2),w(n,k,j,i-1),w(n,k,j,i),w(n,k,j,i+1),w(n,k,j,i+2));
++    }
++
++  return;
++}
++
++void Reconstruction::Weno5X2(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<w.GetDim4(); ++n)
++#pragma omp simd
++    for (int i=il; i<=iu; ++i) {
++      wl(n,i) = interp_weno5(w(n,k,j+2,i),w(n,k,j+1,i),w(n,k,j,i),w(n,k,j-1,i),w(n,k,j-2,i));
++      wr(n,i) = interp_weno5(w(n,k,j-2,i),w(n,k,j-1,i),w(n,k,j,i),w(n,k,j+1,i),w(n,k,j+2,i));
++    }
++
++  return;
++}
++
++void Reconstruction::Weno5X3(const int k, const int j, const int il, const int iu,
++  const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr)
++{
++  for (int n=0; n<w.GetDim4(); ++n)
++#pragma omp simd
++    for (int i=il; i<=iu; ++i) {
++      wl(n,i) = interp_weno5(w(n,k+2,j,i),w(n,k+1,j,i),w(n,k,j,i),w(n,k-1,j,i),w(n,k-2,j,i));
++      wr(n,i) = interp_weno5(w(n,k-2,j,i),w(n,k-1,j,i),w(n,k,j,i),w(n,k+1,j,i),w(n,k+2,j,i));
++    }
++
++  return;
++}
