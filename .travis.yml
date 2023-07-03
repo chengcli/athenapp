@@ -3,9 +3,7 @@
 language: cpp
 branches:
   only:
-  - master
-  - dust
-  - mhd4_3D
+  - snap-mods
 # Default build matrix is 4x Ubuntu builds (inherit the default stage name "test"):
 os:
   - linux
