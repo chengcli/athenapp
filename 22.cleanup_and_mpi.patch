@@ -1,0 +1,165 @@
+diff --git a/.travis.yml b/.travis.yml
+index 07d9d899..1c8337f3 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -3,9 +3,7 @@
+ language: cpp
+ branches:
+   only:
+-  - master
+-  - dust
+-  - mhd4_3D
++  - snap-mods
+ # Default build matrix is 4x Ubuntu builds (inherit the default stage name "test"):
+ os:
+   - linux
+diff --git a/bench/CMakeLists.txt b/bench/CMakeLists.txt
+index d3f498ef..5c64ee66 100644
+--- a/bench/CMakeLists.txt
++++ b/bench/CMakeLists.txt
+@@ -8,25 +8,27 @@ string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
+ add_executable(shock_tube.${buildl} main.cpp shock_tube.cpp dummy.cpp)
+ 
+ set_target_properties(shock_tube.${buildl}
+-	PROPERTIES
+-	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+-	COMPILE_FLAGS ${CMAKE_CXX_FLAGS_${buildu}}
+-	)
++  PROPERTIES
++  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
++  COMPILE_FLAGS ${CMAKE_CXX_FLAGS_${buildu}}
++  )
+ 
+ target_link_libraries(shock_tube.${buildl}
+-    ${ATHENAPP_LIBRARY_${buildu}}
+-	)
++  ${ATHENAPP_LIBRARY_${buildu}}
++  ${MPI_CXX_LIBRARIES}
++  )
+ 
+ target_include_directories(shock_tube.${buildl}
+-	PRIVATE
+-    ${ATHENAPP_INCLUDE_DIR}
+-	)
++  PRIVATE
++  ${ATHENAPP_INCLUDE_DIR}
++  ${MPI_CXX_INCLUDE_PATH}
++  )
+ 
+ # copy input files to build directory
+ file(GLOB infiles athinput.*)
+ foreach(infile ${infiles})
+-	get_filename_component(name ${infile} NAME)
+-	configure_file(${infile}
+-		${CMAKE_BINARY_DIR}/bin/${name} COPYONLY
+-		)
++  get_filename_component(name ${infile} NAME)
++  configure_file(${infile}
++    ${CMAKE_BINARY_DIR}/bin/${name} COPYONLY
++    )
+ endforeach()
+diff --git a/cmake/parameters.cmake b/cmake/parameters.cmake
+index 6fc32363..869befaa 100644
+--- a/cmake/parameters.cmake
++++ b/cmake/parameters.cmake
+@@ -67,6 +67,10 @@ SET_IF_EMPTY(FFT_OPTION "NO_FFT")
+ # MPI parallelization (MPI_PARALLEL or NOT_MPI_PARALLEL)
+ SET_IF_EMPTY(MPI_OPTION "NOT_MPI_PARALLEL")
+ 
++IF(MPI_OPTION STREQUAL "MPI_PARALLEL")
++  find_package(MPI REQUIRED)
++endif()
++
+ # OpenMP parallelization (OPENMP_PARALLEL or NOT_OPENMP_PARALLEL)
+ SET_IF_EMPTY(OPENMP_OPTION "NOT_OPENMP_PARALLEL")
+ 
+@@ -111,8 +115,8 @@ SET_IF_EMPTY(NUMBER_GHOST_CELLS 2)
+ math(EXPR NHYDRO_VARIABLES "5 + ${NVAPOR}")
+ math(EXPR NWAVE_VALUE "5 + ${NVAPOR}")
+ 
+-SET_IF_EMPTY(NCLOUDS 0)
+-SET_IF_EMPTY(NTRACER 0)
++SET_IF_EMPTY(NCLOUD 0)
+ SET_IF_EMPTY(NCHEMISTRY 0)
++SET_IF_EMPTY(NTRACER 0)
+ 
+-math(EXPR NUMBER_PASSIVE_SCALARS "${NCLOUDS} + ${NTRACER} + ${NCHEMISTRY}")
++math(EXPR NUMBER_PASSIVE_SCALARS "${NCLOUD} + ${NCHEMISTRY} + ${NTRACER}")
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ecdb67f3..d155490f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(EOS_FILE ${EOS_FILE}.cpp)
+ set(RSOLVER_FILE ${RSOLVER_FILE}.cpp)
+ set(PROBLEM_FILE ${PROBLEM_FILE}.cpp)
+ 
+-message(STATUS ${RSOLVER_DIR}${RSOLVER_FILE})
+-
+ # source files are defined in Makefile.in
+ file(GLOB src_files
+     *.cpp
+@@ -71,24 +69,6 @@ file(GLOB src_files
+ # remove main file
+ list(FILTER src_files EXCLUDE REGEX ".*/src/main\\.cpp$")
+ 
+-# user mod calcualte_fluxes
+-if (EXISTS "${CMAKE_SOURCE_DIR}/athena_mod/hydro/calculate_fluxes.cpp")
+-    message(STATUS "Found calculate_fluxes.cpp in ${CMAKE_SOURCE_DIR}/athena_mod/hydro/calculate_fluxes.cpp")
+-    list(FILTER src_files EXCLUDE REGEX ".*/src/hydro/calculate_fluxes\\.cpp$")
+-endif()
+-
+-# user mod new_blockdt
+-if (EXISTS "${CMAKE_SOURCE_DIR}/athena_mod/hydro/new_blockdt.cpp")
+-    message(STATUS "Found new_blockdt.cpp in ${CMAKE_SOURCE_DIR}/athena_mod/hydro/new_blockdt.cpp")
+-    list(FILTER src_files EXCLUDE REGEX ".*/src/hydro/new_blockdt\\.cpp$")
+-endif()
+-
+-# user mod outputs delegates
+-if (EXISTS "${CMAKE_SOURCE_DIR}/athena_mod/outputs/outputs.cpp")
+-    message(STATUS "Found outputs.cpp in ${CMAKE_SOURCE_DIR}/athena_mod/outputs/outputs.cpp")
+-    list(FILTER src_files EXCLUDE REGEX ".*/src/outputs/outputs\\.cpp$")
+-endif()
+-
+ string(TOLOWER ${CMAKE_BUILD_TYPE} buildl)
+ string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
+ 
+diff --git a/src/mesh/mesh.hpp b/src/mesh/mesh.hpp
+index 01ff45d5..4144da63 100644
+--- a/src/mesh/mesh.hpp
++++ b/src/mesh/mesh.hpp
+@@ -143,9 +143,6 @@ class MeshBlock {
+   void UserWorkInLoop();                          // called in TimeIntegratorTaskList
+ 
+   // opaque pointer
+-  class IndexMap;
+-  std::shared_ptr<IndexMap> pindex;
+-
+   class Impl;
+   std::shared_ptr<Impl> pimpl;
+ 
+diff --git a/src/reconstruct/interpolation.hpp b/src/reconstruct/interpolation.hpp
+index 6162a7c1..5b503fdc 100644
+--- a/src/reconstruct/interpolation.hpp
++++ b/src/reconstruct/interpolation.hpp
+@@ -5,21 +5,9 @@
+ 
+ // Athena++
+ #include "../defs.hpp"
+-//#include "../math/core.h"
+ 
+ #define sqr(x) ( (x)*(x) )
+ 
+-/* 2-nd order plm for non-uniform grid
+-template<typename T>
+-inline T interp_plm(T phim1, T phi, T phip1, Real dxl, Real dx) {
+-  Real dwl = phi - phim1;
+-  Real dwr = phip1 - phi;
+-  Real dw2 = dwl*dwr;
+-  Real dwm = 2.0*dw2/(dwl + dwr);
+-  if (dw2 <= 0.0) dwm = 0.0;
+-  return phi - dxl/dx*dwm;
+-}*/
+-
+ // limiter
+ template<typename T>
+ inline T minmod(T a, T b) {
