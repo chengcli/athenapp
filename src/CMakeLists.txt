@@ -28,8 +28,6 @@ set(EOS_FILE ${EOS_FILE}.cpp)
 set(RSOLVER_FILE ${RSOLVER_FILE}.cpp)
 set(PROBLEM_FILE ${PROBLEM_FILE}.cpp)
 
-message(STATUS ${RSOLVER_DIR}${RSOLVER_FILE})
-
 # source files are defined in Makefile.in
 file(GLOB src_files
     *.cpp
