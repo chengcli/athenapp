@@ -5,20 +5,8 @@
 
 // Athena++
 #include "../defs.hpp"
-//#include "../math/core.h"
 
 #define sqr(x) ( (x)*(x) )
-
-/* 2-nd order plm for non-uniform grid
-template<typename T>
-inline T interp_plm(T phim1, T phi, T phip1, Real dxl, Real dx) {
-  Real dwl = phi - phim1;
-  Real dwr = phip1 - phi;
-  Real dw2 = dwl*dwr;
-  Real dwm = 2.0*dw2/(dwl + dwr);
-  if (dw2 <= 0.0) dwm = 0.0;
-  return phi - dxl/dx*dwm;
-}*/
 
 // limiter
 template<typename T>
