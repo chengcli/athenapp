@@ -164,9 +164,6 @@ class MeshBlock {
   void UserWorkInLoop();                          // called in TimeIntegratorTaskList
 
   // opaque pointer
-  class IndexMap;
-  std::shared_ptr<IndexMap> pindex;
-
   class Impl;
   std::shared_ptr<Impl> pimpl;
 
