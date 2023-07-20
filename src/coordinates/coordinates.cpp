@@ -20,7 +20,7 @@
 #include "../nr_radiation/radiation.hpp"
 #include "../parameter_input.hpp"
 #include "coordinates.hpp"
-#include "../cubed_sphere.hpp"
+//#include "../cubed_sphere.hpp"
 
 
 //----------------------------------------------------------------------------------------

@@ -30,7 +30,7 @@
 #include "../../utils/buffer_utils.hpp"
 #include "../bvals.hpp"
 #include "bvals_cc.hpp"
-#include "../../cubed_sphere.hpp"
+//#include "../../cubed_sphere.hpp"
 
 // MPI header
 #ifdef MPI_PARALLEL
