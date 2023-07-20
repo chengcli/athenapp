@@ -111,9 +111,6 @@
 // CubedSphere option
 #define @CUBED_SPHERE_OPTION@
 
-// Affine option
-#define @AFFINE_OPTION@
-
 // Hydrostatic option
 #define @HYDROSTATIC_OPTION@
 

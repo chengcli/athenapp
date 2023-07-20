@@ -25,7 +25,7 @@
 #include "../mesh/mesh.hpp"
 #include "../utils/buffer_utils.hpp"
 #include "bvals.hpp"
-#include "../cubed_sphere.hpp"
+//#include "../cubed_sphere.hpp"
 
 // required definitions of static data members of BoundaryBase outside class definition
 // (zero-initialization is performed for all static storage duration variables)

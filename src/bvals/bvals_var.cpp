@@ -22,7 +22,7 @@
 #include "../mesh/mesh.hpp"
 #include "bvals_interfaces.hpp"
 
-#include "../cubed_sphere.hpp"
+//#include "../cubed_sphere.hpp"
 
 // MPI header
 #ifdef MPI_PARALLEL
