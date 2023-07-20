@@ -36,6 +36,7 @@ file(GLOB src_files
     bvals/cc/fft_grav/*.cpp
     bvals/cc/hydro/*.cpp
     bvals/cc/mg/*.cpp
+    bvals/cc/nr_radiation/*.cpp
     bvals/fc/*.cpp
     bvals/orbital/*.cpp
     bvals/utils/*.cpp
@@ -51,6 +52,12 @@ file(GLOB src_files
     hydro/*.cpp
     hydro/srcterms/*.cpp
     hydro/hydro_diffusion/*.cpp
+    nr_radiation/*.cpp
+    nr_radiation/integrators/*.cpp
+    nr_radiation/integrators/srcterms/*.cpp
+    nr_radiation/implicit/*.cpp
+    cr/*.cpp
+    cr/integrators/*.cpp
     hydro/rsolvers/${RSOLVER_DIR}${RSOLVER_FILE}
     inputs/*.cpp
     mesh/*.cpp
