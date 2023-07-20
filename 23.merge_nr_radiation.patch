@@ -1,0 +1,89 @@
+diff --git a/cmake/parameters.cmake b/cmake/parameters.cmake
+index 869befaa..7ca34672 100644
+--- a/cmake/parameters.cmake
++++ b/cmake/parameters.cmake
+@@ -41,8 +41,14 @@ SET_IF_EMPTY(STS_ENABLED 0)
+ # include self gravity? default=0 (false)
+ SET_IF_EMPTY(SELF_GRAVITY_ENABLED 0)
+ 
+-# include radiative transfer? default=0 (false)
+-SET_IF_EMPTY(RADIATION_ENABLED 0)
++# include nonrelativistic radiative transfer? default=0 (false)
++SET_IF_EMPTY(NR_RADIATION_ENABLED 0)
++
++# include radiative transfer evolved with implicit method? default=0 (false)
++SET_IF_EMPTY(IM_RADIATION_ENABLED 0)
++
++# include cosmic ray transport? default=0 (false)
++SET_IF_EMPTY(CR_ENABLED 0)
+ 
+ # enable special or general relativity? default=0 (false)
+ SET_IF_EMPTY(RELATIVISTIC_DYNAMICS 0)
+@@ -113,7 +119,32 @@ SET_IF_EMPTY(NFIELD_VARIABLES 0)
+ SET_IF_EMPTY(NUMBER_GHOST_CELLS 2)
+ 
+ math(EXPR NHYDRO_VARIABLES "5 + ${NVAPOR}")
+-math(EXPR NWAVE_VALUE "5 + ${NVAPOR}")
++
++if(MAGNETIC_FIELDS_ENABLED EQUAL 0)
++  math(EXPR NWAVE_VALUE "5 + ${NVAPOR}")
++else()
++  math(EXPR NWAVE_VALUE "7 + ${NVAPOR}")
++endif()
++
++if(NR_RADIATION_ENABLED EQUAL 0)
++  SET_IF_EMPTY(NRAD_VARIABLES 0)
++else()
++  SET_IF_EMPTY(NRAD_VARIABLES 14)
++endif()
++
++if(IM_RADIATION_ENABLED EQUAL 0)
++  SET_IF_EMPTY(NRAD_VARIABLES 0)
++else()
++  SET_IF_EMPTY(NRAD_VARIABLES 14)
++endif()
++
++if(CR_ENABLED EQUAL 0)
++  SET_IF_EMPTY(NCR_VARIABLES 0)
++else()
++  SET_IF_EMPTY(NCR_VARIABLES 4)
++endif()
++
++SET_IF_EMPTY(NGRAV_VARIABLES 0)
+ 
+ SET_IF_EMPTY(NCLOUD 0)
+ SET_IF_EMPTY(NCHEMISTRY 0)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 1b96c560..850e3b45 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -28,8 +28,6 @@ set(EOS_FILE ${EOS_FILE}.cpp)
+ set(RSOLVER_FILE ${RSOLVER_FILE}.cpp)
+ set(PROBLEM_FILE ${PROBLEM_FILE}.cpp)
+ 
+-message(STATUS ${RSOLVER_DIR}${RSOLVER_FILE})
+-
+ # source files are defined in Makefile.in
+ file(GLOB src_files
+     *.cpp
+@@ -38,6 +36,7 @@ file(GLOB src_files
+     bvals/cc/fft_grav/*.cpp
+     bvals/cc/hydro/*.cpp
+     bvals/cc/mg/*.cpp
++    bvals/cc/nr_radiation/*.cpp
+     bvals/fc/*.cpp
+     bvals/orbital/*.cpp
+     bvals/utils/*.cpp
+@@ -53,6 +52,12 @@ file(GLOB src_files
+     hydro/*.cpp
+     hydro/srcterms/*.cpp
+     hydro/hydro_diffusion/*.cpp
++    nr_radiation/*.cpp
++    nr_radiation/integrators/*.cpp
++    nr_radiation/integrators/srcterms/*.cpp
++    nr_radiation/implicit/*.cpp
++    cr/*.cpp
++    cr/integrators/*.cpp
+     hydro/rsolvers/${RSOLVER_DIR}${RSOLVER_FILE}
+     inputs/*.cpp
+     mesh/*.cpp
