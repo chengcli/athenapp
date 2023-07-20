@@ -41,8 +41,14 @@ SET_IF_EMPTY(STS_ENABLED 0)
 # include self gravity? default=0 (false)
 SET_IF_EMPTY(SELF_GRAVITY_ENABLED 0)
 
-# include radiative transfer? default=0 (false)
-SET_IF_EMPTY(RADIATION_ENABLED 0)
+# include nonrelativistic radiative transfer? default=0 (false)
+SET_IF_EMPTY(NR_RADIATION_ENABLED 0)
+
+# include radiative transfer evolved with implicit method? default=0 (false)
+SET_IF_EMPTY(IM_RADIATION_ENABLED 0)
+
+# include cosmic ray transport? default=0 (false)
+SET_IF_EMPTY(CR_ENABLED 0)
 
 # enable special or general relativity? default=0 (false)
 SET_IF_EMPTY(RELATIVISTIC_DYNAMICS 0)
@@ -119,6 +125,26 @@ if(MAGNETIC_FIELDS_ENABLED EQUAL 0)
 else()
   math(EXPR NWAVE_VALUE "7 + ${NVAPOR}")
 endif()
+
+if(NR_RADIATION_ENABLED EQUAL 0)
+  SET_IF_EMPTY(NRAD_VARIABLES 0)
+else()
+  SET_IF_EMPTY(NRAD_VARIABLES 14)
+endif()
+
+if(IM_RADIATION_ENABLED EQUAL 0)
+  SET_IF_EMPTY(NRAD_VARIABLES 0)
+else()
+  SET_IF_EMPTY(NRAD_VARIABLES 14)
+endif()
+
+if(CR_ENABLED EQUAL 0)
+  SET_IF_EMPTY(NCR_VARIABLES 0)
+else()
+  SET_IF_EMPTY(NCR_VARIABLES 4)
+endif()
+
+SET_IF_EMPTY(NGRAV_VARIABLES 0)
 
 SET_IF_EMPTY(NCLOUD 0)
 SET_IF_EMPTY(NCHEMISTRY 0)
