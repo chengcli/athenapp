@@ -27,7 +27,6 @@
 #include "../chem_rad/chem_rad.hpp"
 #include "../coordinates/coordinates.hpp"
 #include "../cr/cr.hpp"
-//#include "../cubed_sphere.hpp"
 #include "../eos/eos.hpp"
 #include "../fft/athena_fft.hpp"
 #include "../field/field.hpp"

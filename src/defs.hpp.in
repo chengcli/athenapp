@@ -127,9 +127,6 @@
 #define COMPILER_COMMAND "@COMPILER_COMMAND@"
 #define COMPILED_WITH_OPTIONS "@COMPILER_FLAGS@" // NOLINT
 
-// CubedSphere option
-#define @CUBED_SPHERE_OPTION@
-
 // Hydrostatic option
 #define @HYDROSTATIC_OPTION@
 
