@@ -20,8 +20,6 @@
 #include "../nr_radiation/radiation.hpp"
 #include "../parameter_input.hpp"
 #include "coordinates.hpp"
-//#include "../cubed_sphere.hpp"
-
 
 //----------------------------------------------------------------------------------------
 //! Coordinates constructor: sets coordinates and coordinate spacing of cell FACES
@@ -209,18 +207,10 @@ Coordinates::Coordinates(MeshBlock *pmb, ParameterInput *pin, bool flag) :
           noffset = static_cast<std::int64_t>((j-jl)*2 + lx2*block_size.nx2);
         }
         Real rx = ComputeMeshGeneratorX(noffset, nrootmesh, true);
-#ifdef CUBED_SPHERE
-        x2f(j) = CubedSphereMeshGeneratorX2(rx, pmy_block->loc);
-#else
         x2f(j) = pm->MeshGenerator_[X2DIR](rx, mesh_size);
-#endif
       }
-#ifdef CUBED_SPHERE
-      // Do nothing
-#else
       x2f(jl) = block_size.x2min;
       x2f(ju+1) = block_size.x2max;
-#endif
 
       for (int j=jl-ng; j<=ju+ng; ++j) {
         dx2f(j) = dx;
@@ -298,18 +288,10 @@ Coordinates::Coordinates(MeshBlock *pmb, ParameterInput *pin, bool flag) :
           noffset = static_cast<std::int64_t>((k-kl)*2 + lx3*block_size.nx3);
         }
         Real rx = ComputeMeshGeneratorX(noffset, nrootmesh, true);
-#ifdef CUBED_SPHERE
-        x3f(k) = CubedSphereMeshGeneratorX3(rx, pmy_block->loc);
-#else
         x3f(k) = pm->MeshGenerator_[X3DIR](rx, mesh_size);
-#endif
       }
-#ifdef CUBED_SPHERE
-      // Do nothing
-#else
       x3f(kl) = block_size.x3min;
       x3f(ku+1) = block_size.x3max;
-#endif
 
       for (int k=kl-ng; k<=ku+ng; ++k) {
         dx3f(k) = dx;

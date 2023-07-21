@@ -22,8 +22,6 @@
 #include "../mesh/mesh.hpp"
 #include "bvals_interfaces.hpp"
 
-//#include "../cubed_sphere.hpp"
-
 // MPI header
 #ifdef MPI_PARALLEL
 #include <mpi.h>
@@ -213,61 +211,6 @@ void BoundaryVariable::SetCompletedFlagSameProcess(NeighborBlock& nb) {
 
 void BoundaryVariable::SendBoundaryBuffers() {
   MeshBlock *pmb = pmy_block_;
-#ifdef CUBED_SPHERE
-  // For cubed sphere, synchronize the in-panel boundary buffers first
-  // In cubed sphere option, MPI is automatically enabled and each process only allow one block
-  LogicalLocation loc = pmb->loc;
-  for (int n=0; n<pbval_->nneighbor; n++) {
-    NeighborBlock& nb = pbval_->neighbor[n];
-    int ox2 = nb.ni.ox2;
-    int ox3 = nb.ni.ox3;
-    int tox2, tox3;
-    TransformOxForCubedSphere(&ox2, &ox3, &tox2, &tox3, loc);
-    LogicalLocation tloc;
-    tloc.lx1 = loc.lx1;
-    tloc.lx2 = loc.lx2 + ox2;
-    tloc.lx3 = loc.lx3 + ox3;
-    int blockID_tg = FindBlockID(tloc);
-    int blockID = FindBlockID(loc);
-    if (blockID != blockID_tg) // Not in the same panel
-      continue;
-    if (bd_var_.sflag[nb.bufid] == BoundaryStatus::completed) continue;
-    int ssize;
-    ssize = LoadBoundaryBufferSameLevel(bd_var_.send[nb.bufid], nb); // Cubed sphere only has same-level neighbors
-    MPI_Start(&(bd_var_.req_send[nb.bufid]));
-    bd_var_.sflag[nb.bufid] = BoundaryStatus::completed;
-  }
-
-  // Receive the in-panel boundary buffers
-  // Note that the BoudaryStatus flag is set to "waiting" before this is called
-  for (int n=0; n<pbval_->nneighbor; n++) {
-    NeighborBlock& nb = pbval_->neighbor[n];
-    int ox2 = nb.ni.ox2;
-    int ox3 = nb.ni.ox3;
-    int tox2, tox3;
-    TransformOxForCubedSphere(&ox2, &ox3, &tox2, &tox3, loc);
-    LogicalLocation tloc;
-    tloc.lx1 = loc.lx1;
-    tloc.lx2 = loc.lx2 + ox2;
-    tloc.lx3 = loc.lx3 + ox3;
-    int blockID_tg = FindBlockID(tloc);
-    int blockID = FindBlockID(loc);
-    if (blockID != blockID_tg) // Not in the same panel
-      continue;
-    if (bd_var_.flag[nb.bufid] == BoundaryStatus::arrived) continue;
-    while (bd_var_.flag[nb.bufid] == BoundaryStatus::waiting) {
-        int test;
-        // probe MPI communications.  This is a bit of black magic that seems to promote
-        // communications to top of stack and gets them to complete more quickly
-        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &test, MPI_STATUS_IGNORE);
-        MPI_Test(&(bd_var_.req_recv[nb.bufid]), &test, MPI_STATUS_IGNORE);
-        if (!static_cast<bool>(test)) {
-          continue;
-        }
-        bd_var_.flag[nb.bufid] = BoundaryStatus::arrived;
-    }
-  }
-#endif
   int mylevel = pmb->loc.level;
   for (int n=0; n<pbval_->nneighbor; n++) {
     NeighborBlock& nb = pbval_->neighbor[n];
