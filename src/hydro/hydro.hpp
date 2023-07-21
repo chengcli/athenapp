@@ -50,13 +50,6 @@ class Hydro {
 
   AthenaArray<Real> flux[3];  // face-averaged flux vector
 
-#ifdef CUBED_SPHERE
-  AthenaArray<Real> L3DValues[3], R3DValues[3];
-  MPI_Request send_request[4];
-  MPI_Request recv_request[4];
-  std::vector<Real> LRDataBuffer[4];
-#endif
-
   // storage for SMR/AMR
   // TODO(KGF): remove trailing underscore or revert to private:
   AthenaArray<Real> coarse_cons_, coarse_prim_;
@@ -95,19 +88,6 @@ class Hydro {
 #endif
   void CalculateVelocityDifferences(const int k, const int j, const int il, const int iu,
     const int ivx, AthenaArray<Real> &dvn, AthenaArray<Real> &dvt);
-
-#ifdef CUBED_SPHERE
-  void SaveLR3DValues(AthenaArray<Real> &L_in, AthenaArray<Real> &R_in,
-    int direction, int k, int j, int il, int iu);
-
-  void LoadLR3DValues(AthenaArray<Real> &L_in, AthenaArray<Real> &R_in,
-    int direction, int k, int j, int il, int iu);
-
-  void SynchronizeFluxesSend();
-  void SynchronizeFluxesRecv();
-  void SendNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
-  void RecvNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
-#endif
 
  private:
   AthenaArray<Real> dt1_, dt2_, dt3_;  // scratch arrays used in NewTimeStep
