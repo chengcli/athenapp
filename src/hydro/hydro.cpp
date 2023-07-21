@@ -144,17 +144,6 @@ Hydro::Hydro(MeshBlock *pmb, ParameterInput *pin) :
     laplacian_r_fc_.NewAthenaArray(nc1);
   }
 
-#ifdef CUBED_SPHERE
-  // initialize 3D values
-  L3DValues[0].NewAthenaArray(NWAVE, nc3, nc2, nc1);
-  L3DValues[1].NewAthenaArray(NWAVE, nc3, nc2, nc1);
-  L3DValues[2].NewAthenaArray(NWAVE, nc3, nc2, nc1);
-
-  R3DValues[0].NewAthenaArray(NWAVE, nc3, nc2, nc1);
-  R3DValues[1].NewAthenaArray(NWAVE, nc3, nc2, nc1);
-  R3DValues[2].NewAthenaArray(NWAVE, nc3, nc2, nc1);
-#endif
-
   UserTimeStep_ = pmb->pmy_mesh->UserTimeStep_;
 }
 
