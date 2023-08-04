@@ -190,6 +190,10 @@ void PassiveScalars::CalculateFluxes(AthenaArray<Real> &r, const int order) {
           pmb->precon->DonorCellX2(k, j, il, iu, r, rlb_, rr_);
         } else if (order == 2) {
           pmb->precon->PiecewiseLinearX2(k, j, il, iu, r, rlb_, rr_);
+        } else if (order == 3) {
+          pmb->precon->Weno3X2(k, j, il, iu, r, rlb_, rr_);
+        } else if (order == 5) {
+          pmb->precon->Weno5X2(k, j, il, iu, r, rlb_, rr_);
         } else {
           pmb->precon->PiecewiseParabolicX2(k, j, il, iu, r, rlb_, rr_);
           for (int n=0; n<NSCALARS; ++n) {
@@ -295,6 +299,10 @@ void PassiveScalars::CalculateFluxes(AthenaArray<Real> &r, const int order) {
           pmb->precon->DonorCellX3(k, j, il, iu, r, rlb_, rr_);
         } else if (order == 2) {
           pmb->precon->PiecewiseLinearX3(k, j, il, iu, r, rlb_, rr_);
+        } else if (order == 3) {
+          pmb->precon->Weno3X3(k, j, il, iu, r, rlb_, rr_);
+        } else if (order == 5) {
+          pmb->precon->Weno5X3(k, j, il, iu, r, rlb_, rr_);
         } else {
           pmb->precon->PiecewiseParabolicX3(k, j, il, iu, r, rlb_, rr_);
           for (int n=0; n<NSCALARS; ++n) {
