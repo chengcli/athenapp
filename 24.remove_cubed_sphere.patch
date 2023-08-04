@@ -1,0 +1,718 @@
+diff --git a/cmake/parameters.cmake b/cmake/parameters.cmake
+index 7ca34672..0decbc48 100644
+--- a/cmake/parameters.cmake
++++ b/cmake/parameters.cmake
+@@ -98,12 +98,6 @@ SET_IF_EMPTY(DEBUG_OPTION "NOT_DEBUG")
+ # try/throw/catch C++ exception handling (ENABLE_EXCEPTIONS or DISABLE_EXCEPTIONS)
+ SET_IF_EMPTY(EXCEPTION_HANDLING_OPTION "ENABLE_EXCEPTIONS")
+ 
+-# cubed sphere option (CUBED_SPHERE or NOT_CUBED_SPHERE)
+-SET_IF_EMPTY(CUBED_SPHERE_OPTION "NOT_CUBED_SPHERE")
+-
+-# affine coordinate option (AFFINE or NOT_AFFINE)
+-SET_IF_EMPTY(AFFINE_OPTION "NOT_AFFINE")
+-
+ # hydrostatic option (HYDROSTATIC or NOT_HYDROSTATIC)
+ SET_IF_EMPTY(HYDROSTATIC_OPTION "NOT_HYDROSTATIC")
+ 
+@@ -118,12 +112,16 @@ SET_IF_EMPTY(NVAPOR 0)
+ SET_IF_EMPTY(NFIELD_VARIABLES 0)
+ SET_IF_EMPTY(NUMBER_GHOST_CELLS 2)
+ 
+-math(EXPR NHYDRO_VARIABLES "5 + ${NVAPOR}")
++if(NON_BAROTROPIC_EOS EQUAL 1)
++  math(EXPR NHYDRO_VARIABLES "5 + ${NVAPOR}")
++else()
++  math(EXPR NHYDRO_VARIABLES "4 + ${NVAPOR}")
++endif()
+ 
+ if(MAGNETIC_FIELDS_ENABLED EQUAL 0)
+-  math(EXPR NWAVE_VALUE "5 + ${NVAPOR}")
++  set(NWAVE_VALUE ${NHYDRO_VARIABLES})
+ else()
+-  math(EXPR NWAVE_VALUE "7 + ${NVAPOR}")
++  math(EXPR NWAVE_VALUE "2 + ${NHYDRO_VARIABLES}")
+ endif()
+ 
+ if(NR_RADIATION_ENABLED EQUAL 0)
+diff --git a/src/bvals/bvals_base.cpp b/src/bvals/bvals_base.cpp
+index 5feb7f5b..70f2d2f3 100644
+--- a/src/bvals/bvals_base.cpp
++++ b/src/bvals/bvals_base.cpp
+@@ -25,7 +25,6 @@
+ #include "../mesh/mesh.hpp"
+ #include "../utils/buffer_utils.hpp"
+ #include "bvals.hpp"
+-#include "../cubed_sphere.hpp"
+ 
+ // required definitions of static data members of BoundaryBase outside class definition
+ // (zero-initialization is performed for all static storage duration variables)
+@@ -368,18 +367,8 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+   if (block_size_.nx2 == 1) return;
+ 
+   // x2 face
+-  // variables for the cubed sphere implementation right now we only care about 
+-  // the same level
+   for (int n=-1; n<=1; n+=2) {
+-#ifdef CUBED_SPHERE
+-    int tmp_ox2, tmp_ox3, tmp_tox2, tmp_tox3;
+-    tmp_ox2 = n;
+-    tmp_ox3 = 0;
+-    TransformOxForCubedSphere(&tmp_ox2, &tmp_ox3, &tmp_tox2, &tmp_tox3, loc);
+-    neibt = tree.FindNeighbor(loc, 0, tmp_ox2, tmp_ox3, block_bcs);
+-#else
+     neibt = tree.FindNeighbor(loc, 0, n, 0, block_bcs);
+-#endif
+     if (neibt == nullptr) { bufid += nf1*nf2; continue;}
+     if (neibt->pleaf_ != nullptr) { // neighbor at finer level
+       int fface = 1 - (n + 1)/2; // 0 for BoundaryFace::outer_x2, 1 for inner_x2
+@@ -389,11 +378,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+           MeshBlockTree* nf = neibt->GetLeaf(f1, fface, f2);
+           int fid = nf->gid_;
+           int nlevel = nf->loc_.level;
+-#ifdef CUBED_SPHERE
+-          int tbid = FindBufferID(0, tmp_tox2, tmp_tox3, 0, 0);
+-#else
+           int tbid = FindBufferID(0, -n, 0, 0, 0);
+-#endif
+           neighbor[nneighbor].SetNeighbor(
+               ranklist[fid], nlevel, fid, fid-nslist[ranklist[fid]], 0, n, 0,
+               NeighborConnect::face, bufid, tbid, false, false, f1, f2);
+@@ -411,17 +396,9 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+             || (n == 1 && block_bcs[BoundaryFace::outer_x2] == BoundaryFlag::polar)) {
+           polar = true; // neighbor is across top or bottom pole
+         }
+-#ifdef CUBED_SPHERE
+-        tbid = FindBufferID(0, tmp_tox2, tmp_tox3, 0, 0);
+-#else
+         tbid = FindBufferID(0, polar ? n : -n, 0, 0, 0);
+-#endif
+       } else { // neighbor at coarser level
+-#ifdef CUBED_SPHERE
+-        tbid = FindBufferID(0, tmp_tox2, tmp_tox3, myfx1, myfx3);
+-#else
+         tbid = FindBufferID(0, -n, 0, myfx1, myfx3);
+-#endif
+       }
+       neighbor[nneighbor].SetNeighbor(
+           ranklist[nid], nlevel, nid, nid-nslist[ranklist[nid]], 0, n, 0,
+@@ -433,15 +410,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+   // x3 face
+   if (block_size_.nx3 > 1) {
+     for (int n=-1; n<=1; n+=2) {
+-#ifdef CUBED_SPHERE
+-      int tmp_ox2, tmp_ox3, tmp_tox2, tmp_tox3;
+-      tmp_ox2 = 0;
+-      tmp_ox3 = n;
+-      TransformOxForCubedSphere(&tmp_ox2, &tmp_ox3, &tmp_tox2, &tmp_tox3, loc);
+-      neibt = tree.FindNeighbor(loc, 0, tmp_ox2, tmp_ox3, block_bcs);
+-#else
+       neibt=tree.FindNeighbor(loc, 0, 0, n, block_bcs);
+-#endif
+       if (neibt == nullptr) { bufid += nf1*nf2; continue;}
+       if (neibt->pleaf_ != nullptr) { // neighbor at finer level
+         int fface = 1 - (n + 1)/2; // 0 for BoundaryFace::outer_x3, 1 for inner_x3
+@@ -451,12 +420,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+             MeshBlockTree* nf = neibt->GetLeaf(f1, f2, fface);
+             int fid = nf->gid_;
+             int nlevel = nf->loc_.level;
+-#ifdef CUBED_SPHERE
+-          int tbid = FindBufferID(0, tmp_tox2, tmp_tox3, 0, 0);
+-#else
+-          int tbid = FindBufferID(0, 0, -n, 0, 0);
+-#endif
+-            
++            int tbid = FindBufferID(0, 0,  -n, 0, 0);
+             neighbor[nneighbor].SetNeighbor(
+                 ranklist[fid], nlevel, fid, fid-nslist[ranklist[fid]], 0, 0, n,
+                 NeighborConnect::face, bufid, tbid, false, false, f1, f2);
+@@ -469,18 +433,9 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+         nblevel[n+1][1][1] = nlevel;
+         int tbid;
+         if (nlevel == loc.level) { // neighbor at same level
+-#ifdef CUBED_SPHERE
+-        tbid = FindBufferID(0, tmp_tox2, tmp_tox3, 0, 0);
+-#else
+-        tbid = FindBufferID(0, 0, -n, 0, 0);
+-#endif
++          tbid = FindBufferID(0, 0, -n, 0, 0);
+         } else { // neighbor at coarser level
+-#ifdef CUBED_SPHERE
+-        tbid = FindBufferID(0, tmp_tox2, tmp_tox3, myfx1, myfx2);
+-#else
+-        tbid = FindBufferID(0, 0, -n, myfx1, myfx2);
+-#endif
+-          
++          tbid = FindBufferID(0, 0, -n, myfx1, myfx2);
+         }
+         neighbor[nneighbor].SetNeighbor(
+             ranklist[nid], nlevel, nid, nid-nslist[ranklist[nid]], 0, 0, n,
+@@ -531,9 +486,9 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+                   && block_bcs[BoundaryFace::outer_x1] == BoundaryFlag::shear_periodic)) {
+             shear = true; // neighbor is on shearing periodic bcs
+           }
+-        tbid = FindBufferID(-n, polar ? m : -m, 0, 0, 0);
++          tbid = FindBufferID(-n, polar ? m : -m, 0, 0, 0);
+         } else { // neighbor at coarser level
+-        tbid = FindBufferID(-n, polar ? m : -m, 0, myfx3, 0);
++          tbid = FindBufferID(-n, polar ? m : -m, 0, myfx3, 0);
+         }
+         if (nlevel >= loc.level || (myox1 == n && myox2 == m)) {
+           neighbor[nneighbor].SetNeighbor(
+@@ -668,8 +623,7 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+         int tbid;
+         bool shear = false;
+         if (nlevel == loc.level) { // neighbor at same level
+-
+-        tbid = FindBufferID(-n, 0, -m, 0, 0);
++          tbid = FindBufferID(-n, 0, -m, 0, 0);
+           if ((n == -1
+                && block_bcs[BoundaryFace::inner_x1] == BoundaryFlag::shear_periodic)
+               || (n == 1
+@@ -677,7 +631,6 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+             shear = true; //neighbor is on shearing periodic boundary
+           }
+         } else { // neighbor at coarser level
+-        tbid = FindBufferID(-n, 0, -m, myfx2, 0);
+           tbid = FindBufferID(-n, 0, -m, myfx2, 0);
+         }
+         if (nlevel >= loc.level || (myox1 == n && myox3 == m)) {
+@@ -692,7 +645,6 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+   }
+ 
+   // x2x3 edge
+-  // Cubed sphere not using these edge values
+   for (int m=-1; m<=1; m+=2) {
+     for (int n=-1; n<=1; n+=2) {
+       neibt=tree.FindNeighbor(loc, 0, n, m, block_bcs);
+@@ -739,7 +691,6 @@ void BoundaryBase::SearchAndSetNeighbors(MeshBlockTree &tree, int *ranklist,
+   }
+ 
+   // corners
+-  // cubed sphere not using corner values either
+   for (int l=-1; l<=1; l+=2) {
+     for (int m=-1; m<=1; m+=2) {
+       for (int n=-1; n<=1; n+=2) {
+diff --git a/src/bvals/bvals_var.cpp b/src/bvals/bvals_var.cpp
+index a432e2a8..6d2460f1 100644
+--- a/src/bvals/bvals_var.cpp
++++ b/src/bvals/bvals_var.cpp
+@@ -22,8 +22,6 @@
+ #include "../mesh/mesh.hpp"
+ #include "bvals_interfaces.hpp"
+ 
+-#include "../cubed_sphere.hpp"
+-
+ // MPI header
+ #ifdef MPI_PARALLEL
+ #include <mpi.h>
+@@ -213,61 +211,6 @@ void BoundaryVariable::SetCompletedFlagSameProcess(NeighborBlock& nb) {
+ 
+ void BoundaryVariable::SendBoundaryBuffers() {
+   MeshBlock *pmb = pmy_block_;
+-#ifdef CUBED_SPHERE
+-  // For cubed sphere, synchronize the in-panel boundary buffers first
+-  // In cubed sphere option, MPI is automatically enabled and each process only allow one block
+-  LogicalLocation loc = pmb->loc;
+-  for (int n=0; n<pbval_->nneighbor; n++) {
+-    NeighborBlock& nb = pbval_->neighbor[n];
+-    int ox2 = nb.ni.ox2;
+-    int ox3 = nb.ni.ox3;
+-    int tox2, tox3;
+-    TransformOxForCubedSphere(&ox2, &ox3, &tox2, &tox3, loc);
+-    LogicalLocation tloc;
+-    tloc.lx1 = loc.lx1;
+-    tloc.lx2 = loc.lx2 + ox2;
+-    tloc.lx3 = loc.lx3 + ox3;
+-    int blockID_tg = FindBlockID(tloc);
+-    int blockID = FindBlockID(loc);
+-    if (blockID != blockID_tg) // Not in the same panel
+-      continue;
+-    if (bd_var_.sflag[nb.bufid] == BoundaryStatus::completed) continue;
+-    int ssize;
+-    ssize = LoadBoundaryBufferSameLevel(bd_var_.send[nb.bufid], nb); // Cubed sphere only has same-level neighbors
+-    MPI_Start(&(bd_var_.req_send[nb.bufid]));
+-    bd_var_.sflag[nb.bufid] = BoundaryStatus::completed;
+-  }
+-
+-  // Receive the in-panel boundary buffers
+-  // Note that the BoudaryStatus flag is set to "waiting" before this is called
+-  for (int n=0; n<pbval_->nneighbor; n++) {
+-    NeighborBlock& nb = pbval_->neighbor[n];
+-    int ox2 = nb.ni.ox2;
+-    int ox3 = nb.ni.ox3;
+-    int tox2, tox3;
+-    TransformOxForCubedSphere(&ox2, &ox3, &tox2, &tox3, loc);
+-    LogicalLocation tloc;
+-    tloc.lx1 = loc.lx1;
+-    tloc.lx2 = loc.lx2 + ox2;
+-    tloc.lx3 = loc.lx3 + ox3;
+-    int blockID_tg = FindBlockID(tloc);
+-    int blockID = FindBlockID(loc);
+-    if (blockID != blockID_tg) // Not in the same panel
+-      continue;
+-    if (bd_var_.flag[nb.bufid] == BoundaryStatus::arrived) continue;
+-    while (bd_var_.flag[nb.bufid] == BoundaryStatus::waiting) {
+-        int test;
+-        // probe MPI communications.  This is a bit of black magic that seems to promote
+-        // communications to top of stack and gets them to complete more quickly
+-        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &test, MPI_STATUS_IGNORE);
+-        MPI_Test(&(bd_var_.req_recv[nb.bufid]), &test, MPI_STATUS_IGNORE);
+-        if (!static_cast<bool>(test)) {
+-          continue;
+-        }
+-        bd_var_.flag[nb.bufid] = BoundaryStatus::arrived;
+-    }
+-  }
+-#endif
+   int mylevel = pmb->loc.level;
+   for (int n=0; n<pbval_->nneighbor; n++) {
+     NeighborBlock& nb = pbval_->neighbor[n];
+diff --git a/src/bvals/cc/bvals_cc.cpp b/src/bvals/cc/bvals_cc.cpp
+index 78034bb3..eb6f6039 100644
+--- a/src/bvals/cc/bvals_cc.cpp
++++ b/src/bvals/cc/bvals_cc.cpp
+@@ -30,7 +30,6 @@
+ #include "../../utils/buffer_utils.hpp"
+ #include "../bvals.hpp"
+ #include "bvals_cc.hpp"
+-#include "../../cubed_sphere.hpp"
+ 
+ // MPI header
+ #ifdef MPI_PARALLEL
+@@ -298,12 +297,7 @@ int CellCenteredBoundaryVariable::LoadBoundaryBufferSameLevel(Real *buf,
+   ek = (nb.ni.ox3 < 0) ? (pmb->ks + NGHOST - 1) : pmb->ke;
+   int p = 0;
+   AthenaArray<Real> &var = *var_cc;
+-#ifdef CUBED_SPHERE
+-// nl_, nu_, after buf var
+-  PackDataCubedSphere(var, buf, nl_, nu_, si, ei, sj, ej, sk, ek, p, nb.ni.ox1, nb.ni.ox2, nb.ni.ox3, pmb->loc);
+-#else
+   BufferUtility::PackData(var, buf, nl_, nu_, si, ei, sj, ej, sk, ek, p);
+-#endif
+   return p;
+ }
+ 
+diff --git a/src/coordinates/coordinates.cpp b/src/coordinates/coordinates.cpp
+index f763fe64..c11dd078 100644
+--- a/src/coordinates/coordinates.cpp
++++ b/src/coordinates/coordinates.cpp
+@@ -20,8 +20,6 @@
+ #include "../nr_radiation/radiation.hpp"
+ #include "../parameter_input.hpp"
+ #include "coordinates.hpp"
+-#include "../cubed_sphere.hpp"
+-
+ 
+ //----------------------------------------------------------------------------------------
+ //! Coordinates constructor: sets coordinates and coordinate spacing of cell FACES
+@@ -209,18 +207,10 @@ Coordinates::Coordinates(MeshBlock *pmb, ParameterInput *pin, bool flag) :
+           noffset = static_cast<std::int64_t>((j-jl)*2 + lx2*block_size.nx2);
+         }
+         Real rx = ComputeMeshGeneratorX(noffset, nrootmesh, true);
+-#ifdef CUBED_SPHERE
+-        x2f(j) = CubedSphereMeshGeneratorX2(rx, pmy_block->loc);
+-#else
+         x2f(j) = pm->MeshGenerator_[X2DIR](rx, mesh_size);
+-#endif
+       }
+-#ifdef CUBED_SPHERE
+-      // Do nothing
+-#else
+       x2f(jl) = block_size.x2min;
+       x2f(ju+1) = block_size.x2max;
+-#endif
+ 
+       for (int j=jl-ng; j<=ju+ng; ++j) {
+         dx2f(j) = dx;
+@@ -298,18 +288,10 @@ Coordinates::Coordinates(MeshBlock *pmb, ParameterInput *pin, bool flag) :
+           noffset = static_cast<std::int64_t>((k-kl)*2 + lx3*block_size.nx3);
+         }
+         Real rx = ComputeMeshGeneratorX(noffset, nrootmesh, true);
+-#ifdef CUBED_SPHERE
+-        x3f(k) = CubedSphereMeshGeneratorX3(rx, pmy_block->loc);
+-#else
+         x3f(k) = pm->MeshGenerator_[X3DIR](rx, mesh_size);
+-#endif
+       }
+-#ifdef CUBED_SPHERE
+-      // Do nothing
+-#else
+       x3f(kl) = block_size.x3min;
+       x3f(ku+1) = block_size.x3max;
+-#endif
+ 
+       for (int k=kl-ng; k<=ku+ng; ++k) {
+         dx3f(k) = dx;
+diff --git a/src/cubed_sphere.hpp b/src/cubed_sphere.hpp
+deleted file mode 100644
+index cd9b8a68..00000000
+--- a/src/cubed_sphere.hpp
++++ /dev/null
+@@ -1,216 +0,0 @@
+-#ifndef CUBED_SPHERE_HPP
+-#define CUBED_SPHERE_HPP
+-#include "athena.hpp"
+-#include "coordinates/coordinates.hpp"
+-
+-int FindBlockID(LogicalLocation const& loc);
+-
+-void TransformOxForCubedSphere(int *ox2, int *ox3, int *tox2, int *tox3,
+-  LogicalLocation const& loc);
+-
+-void PackDataCubedSphere(const AthenaArray<Real> &src, Real *buf,
+-         int sn, int en, int si, int ei, int sj, int ej, int sk, int ek, int &offset,
+-         int ox1, int ox2, int ox3,LogicalLocation const& loc);
+-
+-void ProjectLocalCartesianAffine(const AthenaArray<Real> &src, 
+-        AthenaArray<Real> &tgt, Real affine_angle, int sn, int en, int si, int ei, int sj, 
+-        int ej, int sk, int ek, int Dir);
+-
+-void DeProjectLocalCartesianAffine(AthenaArray<Real> &flux, 
+-        Real affine_angle, int sn, int en, int si, int ei, int sj, int ej, int sk, int ek, int Dir);
+-
+-Real CubedSphereMeshGeneratorX2(Real x, LogicalLocation const& loc);
+-Real CubedSphereMeshGeneratorX3(Real x, LogicalLocation const& loc);
+-
+-
+-// Helper functions
+-void GetLatLon(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+-void GetLatLonFace2(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+-void GetLatLonFace3(Real *lat, Real *lon, Coordinates *pcoord, int k, int j, int i);
+-
+-void GetUV(Real *U, Real *V, Coordinates *pcoord, Real V2, Real V3, int k, int j, int i);
+-void GetVyVz(Real *V2, Real *V3, Coordinates *pcoord, Real U, Real V, int k, int j, int i);
+-// Helper functions adapted from Paul
+-void VecTransABPFromRLL(
+-	Real X,
+-	Real Y,
+-	int blockID,
+-	Real U,
+-	Real V,
+-	Real *V2,
+-	Real *V3
+-);
+-void VecTransRLLFromABP(
+-	Real X,
+-	Real Y,
+-	int blockID,
+-	Real V2,
+-	Real V3,
+-	Real *U,
+-	Real *V
+-);
+-void RLLFromXYP(
+-	Real dX,
+-	Real dY,
+-	int nP,
+-	Real &lon,
+-	Real &lat
+-);
+-void XYPFromRLL(
+-	Real lon,
+-	Real lat,
+-	Real &dX,
+-	Real &dY,
+-	int &nP
+-);
+-
+-class GnomonicEquiangle : public Coordinates {
+-public:
+-  GnomonicEquiangle(MeshBlock *pmb, ParameterInput *pin, bool flag);
+-  void Face1Area(const int k, const int j, const int il, const int iu,
+-                 AthenaArray<Real> &area) final;
+-  void Face2Area(const int k, const int j, const int il, const int iu,
+-                 AthenaArray<Real> &area) final;
+-  void Face3Area(const int k, const int j, const int il, const int iu,
+-                 AthenaArray<Real> &area) final;
+-
+-  Real GetFace1Area(const int k, const int j, const int i) final;
+-  Real GetFace2Area(const int k, const int j, const int i) final;
+-  Real GetFace3Area(const int k, const int j, const int i) final;
+-
+-  Real GetVolCenterFace1Area(const int k, const int j, const int i);
+-  Real GetVolCenterFace2Area(const int k, const int j, const int i);
+-  Real GetVolCenterFace3Area(const int k, const int j, const int i);
+-
+-  void VolCenterFace1Area(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &area) final;
+-  void VolCenterFace2Area(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &area) final;
+-  void VolCenterFace3Area(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &area) final;
+-  void CellVolume(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &vol);
+-  Real GetCellVolume(const int k, const int j, const int i);
+-
+-  void CenterWidth1(const int k, const int j, const int il, const int iu,
+-                                AthenaArray<Real> &dx1);
+-  void CenterWidth2(const int k, const int j, const int il, const int iu,
+-                                AthenaArray<Real> &dx2);
+-  void CenterWidth3(const int k, const int j, const int il, const int iu,
+-                                AthenaArray<Real> &dx3);
+-
+-  void CellMetric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-  void Face1Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-  void Face2Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-  void Face3Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-
+-
+-  void PrimToLocal2(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &b1_vals, AthenaArray<Real> &prim_left,
+-        AthenaArray<Real> &prim_right, AthenaArray<Real> &bx);
+-  void PrimToLocal3(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &b1_vals, AthenaArray<Real> &prim_left,
+-        AthenaArray<Real> &prim_right, AthenaArray<Real> &bx);
+-
+-  void FluxToGlobal2(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
+-        AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
+-  void FluxToGlobal3(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
+-        AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
+-  void AddCoordTermsDivergence(
+-    const Real dt, const AthenaArray<Real> *flux,
+-    const AthenaArray<Real> &prim, const AthenaArray<Real> &bcc, AthenaArray<Real> &u);
+-
+-
+-  void Edge1Length(const int k, const int j, const int il, const int iu,
+-      AthenaArray<Real> &len);
+-  void Edge2Length(const int k, const int j, const int il, const int iu,
+-      AthenaArray<Real> &len);
+-  void Edge3Length(const int k, const int j, const int il, const int iu,
+-      AthenaArray<Real> &len);
+-  void VolCenter1Length(const int k, const int j, const int il, const int iu,
+-      AthenaArray<Real> &len);
+-  void VolCenter2Length(const int k, const int j, const int il, const int iu,
+-      AthenaArray<Real> &len);
+-  void VolCenter3Length(const int k, const int j, const int il, const int iu,
+-      AthenaArray<Real> &len);
+-  Real GetEdge1Length(const int k, const int j, const int i);
+-  Real GetEdge2Length(const int k, const int j, const int i);
+-  Real GetEdge3Length(const int k, const int j, const int i);
+-
+-};
+-
+-class AffineCoordinate : public Coordinates {
+-public:
+-  AffineCoordinate(MeshBlock *pmb, ParameterInput *pin, bool flag);
+-
+-  void Face1Area(const int k, const int j, const int il, const int iu,
+-                 AthenaArray<Real> &area) final;
+-  void Face2Area(const int k, const int j, const int il, const int iu,
+-                 AthenaArray<Real> &area) final;
+-  void Face3Area(const int k, const int j, const int il, const int iu,
+-                 AthenaArray<Real> &area) final;
+-  Real GetFace1Area(const int k, const int j, const int i) final;
+-  Real GetFace2Area(const int k, const int j, const int i) final;
+-  Real GetFace3Area(const int k, const int j, const int i) final;
+-
+-  void VolCenterFace1Area(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &area) final;
+-  void VolCenterFace2Area(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &area) final;
+-  void VolCenterFace3Area(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &area) final;
+-  void CellVolume(const int k, const int j, const int il, const int iu,
+-                          AthenaArray<Real> &vol);
+-  Real GetCellVolume(const int k, const int j, const int i);
+-
+-  void CellMetric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-  void Face1Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-  void Face2Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-  void Face3Metric(const int k, const int j, const int il, const int iu, AthenaArray<Real> &g, AthenaArray<Real> &g_inv);
+-
+-
+-  void PrimToLocal2(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &b1_vals, AthenaArray<Real> &prim_left,
+-        AthenaArray<Real> &prim_right, AthenaArray<Real> &bx);
+-  void PrimToLocal3(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &b1_vals, AthenaArray<Real> &prim_left,
+-        AthenaArray<Real> &prim_right, AthenaArray<Real> &bx);
+-
+-  void FluxToGlobal2(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
+-        AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
+-  void FluxToGlobal3(
+-        const int k, const int j, const int il, const int iu,
+-        const AthenaArray<Real> &cons, const AthenaArray<Real> &bbx,
+-        AthenaArray<Real> &flux, AthenaArray<Real> &ey, AthenaArray<Real> &ez);
+-protected:
+-  Real theta_;
+-  Real sin_theta_;
+-  Real cos_theta_;
+-};
+-
+-class CubedSphereLR{
+-  public:
+-    void SetMeshBlock(MeshBlock *pmb_in);
+-    void InitializeSizes(int nc3, int nc2, int nc1);
+-    void SaveLR3DValues(AthenaArray<Real> &L_in, AthenaArray<Real> &R_in, int direction, int k, int j, int il, int iu);
+-    void LoadLR3DValues(AthenaArray<Real> &L_in, AthenaArray<Real> &R_in, int direction, int k, int j, int il, int iu);
+-    void SynchronizeFluxes();
+-    void SendNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
+-    void RecvNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
+-
+-    AthenaArray<Real> L3DValues, R3DValues;
+-    MeshBlock *pmb;
+-};
+-
+-#endif
+-
+diff --git a/src/defs.hpp.in b/src/defs.hpp.in
+index a7f189b2..8d460996 100644
+--- a/src/defs.hpp.in
++++ b/src/defs.hpp.in
+@@ -108,12 +108,6 @@
+ #define COMPILER_COMMAND "@COMPILER_COMMAND@"
+ #define COMPILED_WITH_OPTIONS "@COMPILER_FLAGS@" // NOLINT
+ 
+-// CubedSphere option
+-#define @CUBED_SPHERE_OPTION@
+-
+-// Affine option
+-#define @AFFINE_OPTION@
+-
+ // Hydrostatic option
+ #define @HYDROSTATIC_OPTION@
+ 
+diff --git a/src/eos/adiabatic_hydro.cpp b/src/eos/adiabatic_hydro.cpp
+index ed8fe4d1..e61ff205 100644
+--- a/src/eos/adiabatic_hydro.cpp
++++ b/src/eos/adiabatic_hydro.cpp
+@@ -19,7 +19,6 @@
+ #include "../mesh/mesh.hpp"
+ #include "../parameter_input.hpp"
+ #include "eos.hpp"
+-#include "../cubed_sphere.hpp"
+ 
+ // EquationOfState constructor
+ 
+@@ -68,16 +67,7 @@ void EquationOfState::ConservedToPrimitive(
+         w_vy = u_m2*di;
+         w_vz = u_m3*di;
+ 
+-        Real e_k;
+-#ifdef CUBED_SPHERE
+-        Real U, V;
+-        // Convert m2 m3 to lat-lon
+-        GetUV(&U, &V, pco, u_m2, u_m3, k, j, i);
+-        e_k = 0.5*di*(SQR(u_m1) + SQR(U) + SQR(V));
+-#else
+-        e_k = 0.5*di*(SQR(u_m1) + SQR(u_m2) + SQR(u_m3));
+-#endif
+-
++        Real e_k = 0.5*di*(SQR(u_m1) + SQR(u_m2) + SQR(u_m3));
+         w_p = gm1*(u_e - e_k);
+ 
+         // apply pressure floor, correct total energy
+@@ -117,18 +107,11 @@ void EquationOfState::PrimitiveToConserved(
+         const Real& w_vz = prim(IVZ,k,j,i);
+         const Real& w_p  = prim(IPR,k,j,i);
+ 
+-#ifdef CUBED_SPHERE
+-        Real U, V;
+-        // Convert vy vz to lat-lon
+-        GetUV(&U, &V, pco, w_vy, w_vz, k, j, i);
+-        u_e = w_p*igm1 + 0.5*w_d*(SQR(w_vx) + SQR(U) + SQR(V));
+-#else
+-        u_e = w_p*igm1 + 0.5*w_d*(SQR(w_vx) + SQR(w_vy) + SQR(w_vz));
+-#endif
+         u_d = w_d;
+         u_m1 = w_vx*w_d;
+         u_m2 = w_vy*w_d;
+         u_m3 = w_vz*w_d;
++        u_e = w_p*igm1 + 0.5*w_d*(SQR(w_vx) + SQR(w_vy) + SQR(w_vz));
+       }
+     }
+   }
+diff --git a/src/hydro/hydro.cpp b/src/hydro/hydro.cpp
+index 4de825f0..4f52b6c3 100644
+--- a/src/hydro/hydro.cpp
++++ b/src/hydro/hydro.cpp
+@@ -144,17 +144,6 @@ Hydro::Hydro(MeshBlock *pmb, ParameterInput *pin) :
+     laplacian_r_fc_.NewAthenaArray(nc1);
+   }
+ 
+-#ifdef CUBED_SPHERE
+-  // initialize 3D values
+-  L3DValues[0].NewAthenaArray(NWAVE, nc3, nc2, nc1);
+-  L3DValues[1].NewAthenaArray(NWAVE, nc3, nc2, nc1);
+-  L3DValues[2].NewAthenaArray(NWAVE, nc3, nc2, nc1);
+-
+-  R3DValues[0].NewAthenaArray(NWAVE, nc3, nc2, nc1);
+-  R3DValues[1].NewAthenaArray(NWAVE, nc3, nc2, nc1);
+-  R3DValues[2].NewAthenaArray(NWAVE, nc3, nc2, nc1);
+-#endif
+-
+   UserTimeStep_ = pmb->pmy_mesh->UserTimeStep_;
+ }
+ 
+diff --git a/src/hydro/hydro.hpp b/src/hydro/hydro.hpp
+index b610d89c..73723794 100644
+--- a/src/hydro/hydro.hpp
++++ b/src/hydro/hydro.hpp
+@@ -50,13 +50,6 @@ class Hydro {
+ 
+   AthenaArray<Real> flux[3];  // face-averaged flux vector
+ 
+-#ifdef CUBED_SPHERE
+-  AthenaArray<Real> L3DValues[3], R3DValues[3];
+-  MPI_Request send_request[4];
+-  MPI_Request recv_request[4];
+-  std::vector<Real> LRDataBuffer[4];
+-#endif
+-
+   // storage for SMR/AMR
+   // TODO(KGF): remove trailing underscore or revert to private:
+   AthenaArray<Real> coarse_cons_, coarse_prim_;
+@@ -96,19 +89,6 @@ class Hydro {
+   void CalculateVelocityDifferences(const int k, const int j, const int il, const int iu,
+     const int ivx, AthenaArray<Real> &dvn, AthenaArray<Real> &dvt);
+ 
+-#ifdef CUBED_SPHERE
+-  void SaveLR3DValues(AthenaArray<Real> &L_in, AthenaArray<Real> &R_in,
+-    int direction, int k, int j, int il, int iu);
+-
+-  void LoadLR3DValues(AthenaArray<Real> &L_in, AthenaArray<Real> &R_in,
+-    int direction, int k, int j, int il, int iu);
+-
+-  void SynchronizeFluxesSend();
+-  void SynchronizeFluxesRecv();
+-  void SendNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
+-  void RecvNeighborBlocks(LogicalLocation const& loc, int ox2, int ox3, int tg_rank, int tg_gid);
+-#endif
+-
+  private:
+   AthenaArray<Real> dt1_, dt2_, dt3_;  // scratch arrays used in NewTimeStep
+   // scratch space used to compute fluxes
+diff --git a/src/mesh/meshblock.cpp b/src/mesh/meshblock.cpp
+index df2fc21a..f5ae1913 100644
+--- a/src/mesh/meshblock.cpp
++++ b/src/mesh/meshblock.cpp
+@@ -25,7 +25,6 @@
+ #include "../bvals/bvals.hpp"
+ #include "../coordinates/coordinates.hpp"
+ #include "../cr/cr.hpp"
+-#include "../cubed_sphere.hpp"
+ #include "../eos/eos.hpp"
+ #include "../fft/athena_fft.hpp"
+ #include "../field/field.hpp"
+@@ -124,10 +123,6 @@ MeshBlock::MeshBlock(int igid, int ilid, LogicalLocation iloc, RegionSize input_
+     pcoord = new KerrSchild(this, pin, false);
+   } else if (std::strcmp(COORDINATE_SYSTEM, "gr_user") == 0) {
+     pcoord = new GRUser(this, pin, false);
+-  } else if (std::strcmp(COORDINATE_SYSTEM, "gnomonic_equiangle") == 0) {
+-    pcoord = new GnomonicEquiangle(this, pin, false);
+-  } else if (std::strcmp(COORDINATE_SYSTEM, "affine_coordinates") == 0) {
+-    pcoord = new AffineCoordinate(this, pin, false);
+   }
+ 
+ 
