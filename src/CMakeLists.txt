@@ -4,6 +4,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src
   ${CMAKE_CURRENT_SOURCE_DIR}/..
   ${CMAKE_BINARY_DIR}
+  ${EIGEN3_INCLUDE_DIR}
   )
 
 set(namel athenapp)
