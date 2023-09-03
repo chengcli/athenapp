@@ -1,0 +1,42 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 850e3b45..a9c8d88c 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -4,6 +4,7 @@ include_directories(
+   ${CMAKE_SOURCE_DIR}/src
+   ${CMAKE_CURRENT_SOURCE_DIR}/..
+   ${CMAKE_BINARY_DIR}
++  ${EIGEN3_INCLUDE_DIR}
+   )
+ 
+ set(namel athenapp)
+diff --git a/src/bvals/bvals.hpp b/src/bvals/bvals.hpp
+index fef2db1e..1449014d 100644
+--- a/src/bvals/bvals.hpp
++++ b/src/bvals/bvals.hpp
+@@ -163,6 +163,11 @@ class BoundaryValues : public BoundaryBase, //public BoundaryPhysics,
+ 
+   int AdvanceCounterPhysID(int num_phys);
+ 
++  // check physical boundary
++  bool isPhysicalBoundary(int bid) const {
++    return apply_bndry_fn_[bid];
++  }
++
+  private:
+   MeshBlock *pmy_block_;      // ptr to MeshBlock containing this BoundaryValues
+   int nface_, nedge_;         // used only in fc/flux_correction_fc.cpp calculations
+diff --git a/src/outputs/outputs.cpp b/src/outputs/outputs.cpp
+index 506fd3fd..ea5b0c28 100644
+--- a/src/outputs/outputs.cpp
++++ b/src/outputs/outputs.cpp
+@@ -243,7 +243,8 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
+           op.cartesian_vector = false;
+ 
+         // set output variable and optional data format string used in formatted writes
+-        if (op.file_type.compare("hst") != 0 && op.file_type.compare("rst") != 0) {
++        if (op.file_type.compare("hst") != 0 && op.file_type.compare("rst") != 0 &&
++            op.file_type.compare("dbg") != 0) {
+           op.variable = pin->GetString(op.block_name, "variable");
+         }
+         op.data_format = pin->GetOrAddString(op.block_name, "data_format", "%12.5e");
