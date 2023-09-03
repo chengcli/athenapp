@@ -163,6 +163,11 @@ class BoundaryValues : public BoundaryBase, //public BoundaryPhysics,
 
   int AdvanceCounterPhysID(int num_phys);
 
+  // check physical boundary
+  bool isPhysicalBoundary(int bid) const {
+    return apply_bndry_fn_[bid];
+  }
+
  private:
   MeshBlock *pmy_block_;      // ptr to MeshBlock containing this BoundaryValues
   int nface_, nedge_;         // used only in fc/flux_correction_fc.cpp calculations
