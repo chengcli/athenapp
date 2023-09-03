@@ -243,7 +243,8 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
           op.cartesian_vector = false;
 
         // set output variable and optional data format string used in formatted writes
-        if (op.file_type.compare("hst") != 0 && op.file_type.compare("rst") != 0) {
+        if (op.file_type.compare("hst") != 0 && op.file_type.compare("rst") != 0 &&
+            op.file_type.compare("dbg") != 0) {
           op.variable = pin->GetString(op.block_name, "variable");
         }
         op.data_format = pin->GetOrAddString(op.block_name, "data_format", "%12.5e");
