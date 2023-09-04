@@ -213,6 +213,12 @@ Reconstruction::Reconstruction(MeshBlock *pmb, ParameterInput *pin) :
     curvilinear[X1DIR] = true;
     curvilinear[X2DIR] = true;
   }
+  if (std::strcmp(COORDINATE_SYSTEM, "gnomonic_equiangle") == 0) {
+    //curvilinear[X2DIR] = true;
+    //curvilinear[X3DIR] = true;
+  }
+  shock_capture_flag_ = pin->GetOrAddBoolean("time", "shock_capture", false);
+
   // for all coordinate systems, nonuniform geometric spacing or user-defined
   // MeshGenerator ---> use nonuniform reconstruction weights and limiter terms
   if (pmb->block_size.x1rat != 1.0)
