@@ -230,6 +230,9 @@ class Reconstruction {
  private:
   MeshBlock* pmy_block_;  // ptr to MeshBlock containing this Reconstruction
 
+  // for weno schemes
+  bool shock_capture_flag_;
+
   // scratch arrays used in PLM and PPM reconstruction functions
   AthenaArray<Real> scr01_i_, scr02_i_, scr03_i_, scr04_i_, scr05_i_;
   AthenaArray<Real> scr06_i_, scr07_i_, scr08_i_, scr09_i_, scr10_i_;
