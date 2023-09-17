@@ -299,6 +299,7 @@ class Mesh {
   void SaveAllStates();
   void LoadAllStates();
   void DecreaseTimeStep();
+  bool CheckAllValid() const;
 
  private:
   // data
