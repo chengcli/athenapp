@@ -45,9 +45,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/parameters.cmake)
 
 ## 3. set up project system libraries ##
 message(STATUS "3. Set up project system libraries ...")
-if (${MPI_OPTION} STREQUAL "MPI_PARALLEL")
-    find_package(MPI REQUIRED)
-endif()
 
 ## 4. set up project configure file and library ##
 message(STATUS "4. Set up project libraries ...")
