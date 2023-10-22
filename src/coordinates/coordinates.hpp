@@ -213,6 +213,11 @@ class Coordinates {
   virtual void LowerVectorCell(Real a0, Real a1, Real a2, Real a3, int k, int j, int i,
                                Real *pa_0, Real *pa_1, Real *pa_2, Real *pa_3) {}
 
+  // for particle-mesh interpolation
+  Real const * GetFaceCoords() const { return x321f_.data(); }
+  Real const * GetCellCoords() const { return x321v_.data(); }
+  int const * GetDimensions() const { return nc321_.data(); }
+
  protected:
   bool coarse_flag;  // true if this coordinate object is parent (coarse) mesh in AMR
   Mesh *pm;
@@ -305,6 +310,16 @@ class Coordinates {
   // GR-specific variables
   Real bh_mass_;
   Real bh_spin_;
+
+  // for particle-mesh interpolation
+  //! cell face coordinates
+  std::vector<Real> x321f_;
+
+  //! cell center coordinates
+  std::vector<Real> x321v_;
+
+  //! meshblock dimensions
+  std::vector<int> nc321_;
 };
 
 //----------------------------------------------------------------------------------------

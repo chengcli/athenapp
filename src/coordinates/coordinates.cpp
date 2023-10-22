@@ -318,6 +318,23 @@ Coordinates::Coordinates(MeshBlock *pmb, ParameterInput *pin, bool flag) :
     x3f(kl  ) = block_size.x3min;
     x3f(ku+1) = block_size.x3max;
   }
+
+  // for particle-mesh interpolation
+  x321f_.resize(nc3 + nc2 + nc1 + 3);
+  for (int k = 0; k <= nc3; ++k) x321f_[k] = x3f(k);
+  for (int j = 0; j <= nc2; ++j) x321f_[nc3 + 1 + j] = x2f(j);
+  for (int i = 0; i <= nc1; ++i)
+    x321f_[nc3 + nc2 + 2 + i] = x1f(i);
+
+  x321v_.resize(nc3 + nc2 + nc1);
+  for (int k = 0; k < nc3; ++k) x321v_[k] = x3v(k);
+  for (int j = 0; j < nc2; ++j) x321v_[nc3 + j] = x2v(j);
+  for (int i = 0; i < nc1; ++i) x321v_[nc3 + nc2 + i] = x1v(i);
+
+  nc321_.resize(3);
+  nc321_[0] = nc3;
+  nc321_[1] = nc2;
+  nc321_[2] = nc1;
 }
 
 
