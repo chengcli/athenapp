@@ -216,7 +216,7 @@ class Coordinates {
   // for particle-mesh interpolation
   Real const * GetFaceCoords() const { return x321f_.data(); }
   Real const * GetCellCoords() const { return x321v_.data(); }
-  int const * GetDimensions() const { return nc321_.data(); }
+  size_t const * GetDimensions() const { return nc321_.data(); }
 
  protected:
   bool coarse_flag;  // true if this coordinate object is parent (coarse) mesh in AMR
@@ -319,7 +319,7 @@ class Coordinates {
   std::vector<Real> x321v_;
 
   //! meshblock dimensions
-  std::vector<int> nc321_;
+  std::vector<size_t> nc321_;
 };
 
 //----------------------------------------------------------------------------------------
