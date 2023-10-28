@@ -218,6 +218,10 @@ class Coordinates {
   Real const * GetCellCoords() const { return x321v_.data(); }
   size_t const * GetDimensions() const { return nc321_.data(); }
 
+  // for hydrostatic simulation
+  Real GetReferencePressure() const { return reference_pressure_; }
+  Real GetPressureScaleHeight() const { return pressure_scale_height_; }
+
  protected:
   bool coarse_flag;  // true if this coordinate object is parent (coarse) mesh in AMR
   Mesh *pm;
@@ -320,6 +324,10 @@ class Coordinates {
 
   //! meshblock dimensions
   std::vector<size_t> nc321_;
+
+  // for hydrostatic simulation
+  Real reference_pressure_;
+  Real pressure_scale_height_;
 };
 
 //----------------------------------------------------------------------------------------

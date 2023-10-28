@@ -335,6 +335,13 @@ Coordinates::Coordinates(MeshBlock *pmb, ParameterInput *pin, bool flag) :
   nc321_[0] = nc3;
   nc321_[1] = nc2;
   nc321_[2] = nc1;
+
+  // for hydrostatic simulation
+  // reference pressure
+  reference_pressure_ = pin->GetOrAddReal("mesh", "ReferencePressure", 1.e5);
+
+  // pressure scale height
+  pressure_scale_height_ = pin->GetOrAddReal("mesh", "PressureScaleHeight", 10.e3);
 }
 
 
