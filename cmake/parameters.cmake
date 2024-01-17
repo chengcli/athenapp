@@ -22,6 +22,12 @@ SET_IF_EMPTY(RSOLVER "hllc")
 # Equation of state
 SET_IF_EMPTY(EQUATION_OF_STATE "adiabatic")
 
+# ChemNetwork class header file included in species.hpp
+SET_IF_EMPTY(CHEMNETWORK_HEADER "../chemistry/network/chem_network.hpp")
+
+# ChemRadiation integrator method, used in constructing ChemRadiationIntegratorTaskList
+SET_IF_EMPTY(CHEMRADIATION_INTEGRATOR "none")
+
 ## configure.py dict(definitions) Boolean values:
 # use general EOS framework default=0 (false).
 SET_IF_EMPTY(GENERAL_EOS 0)
@@ -40,6 +46,12 @@ SET_IF_EMPTY(STS_ENABLED 0)
 
 # include self gravity? default=0 (false)
 SET_IF_EMPTY(SELF_GRAVITY_ENABLED 0)
+
+# include chemistry? default=0 (false)
+SET_IF_EMPTY(CHEMISTRY_ENABLED 0)
+
+# include radiative transfer in chemistry calculations? default=0 (false)
+SET_IF_EMPTY(CHEMRADIATION_ENABLED 0)
 
 # include nonrelativistic radiative transfer? default=0 (false)
 SET_IF_EMPTY(NR_RADIATION_ENABLED 0)
@@ -65,10 +77,17 @@ SET_IF_EMPTY(SINGLE_PRECISION_ENABLED 0)
 # use double precision for HDF5 output? default=0 (false; write out binary32)
 SET_IF_EMPTY(H5_DOUBLE_PRECISION_ENABLED 0)
 
+# compile with debug symbols and use optional sections of source code? default=0 (false)
+SET_IF_EMPTY(DEBUG_OPTION 0)
+
 ## configure.py dict(definitions) Boolean string macros:
 ## (these options have the latter (false) option as defaults, unless noted otherwise)
-# make use of FFT? (FFT or NO_FFT)
+
+# FFTW library (FFT or NO_FFT)
 SET_IF_EMPTY(FFT_OPTION "NO_FFT")
+
+# CVODE solver (CVODE or NO_CVODE)
+SET_IF_EMPTY(CVODE_OPTION "NO_CVODE")
 
 # MPI parallelization (MPI_PARALLEL or NOT_MPI_PARALLEL)
 SET_IF_EMPTY(MPI_OPTION "NOT_MPI_PARALLEL")
@@ -92,9 +111,6 @@ SET_IF_EMPTY(PNETCDF_OPTION "NO_PNETCDFOUTPUT")
 # FITS output (FITSOUTPUT or NO_FITSOUTPUT)
 SET_IF_EMPTY(FITS_OPTION "NO_FITSOUTPUT")
 
-# debug build macros (DEBUG or NOT_DEBUG)
-SET_IF_EMPTY(DEBUG_OPTION "NOT_DEBUG")
-
 # try/throw/catch C++ exception handling (ENABLE_EXCEPTIONS or DISABLE_EXCEPTIONS)
 SET_IF_EMPTY(EXCEPTION_HANDLING_OPTION "ENABLE_EXCEPTIONS")
 
@@ -111,6 +127,7 @@ SET_IF_EMPTY(COMPILER_FLAGS ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 SET_IF_EMPTY(NVAPOR 0)
 SET_IF_EMPTY(NFIELD_VARIABLES 0)
 SET_IF_EMPTY(NUMBER_GHOST_CELLS 2)
+SET_IF_EMPTY(NUMBER_CHEMICAL_SPECIES 0)
 
 if(NON_BAROTROPIC_EOS EQUAL 1)
   math(EXPR NHYDRO_VARIABLES "5 + ${NVAPOR}")

@@ -71,6 +71,7 @@ file(GLOB src_files
     scalars/*.cpp
     task_list/*.cpp
     utils/*.cpp
+    units/*.cpp
     ${MPIFFT_FILE}
   )
 

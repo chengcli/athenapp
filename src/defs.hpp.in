@@ -88,9 +88,6 @@
 // configure.py dict(definitions) Boolean string macros:
 // (these options have the latter (false) option as defaults, unless noted otherwise)
 
-// make use of FFT? (FFT or NO_FFT)
-#define @FFT_OPTION@
-
 // MPI parallelization (MPI_PARALLEL or NOT_MPI_PARALLEL)
 #define @MPI_OPTION@
 
@@ -114,9 +111,6 @@
 
 // FITS output (FITSOUTPUT or NO_FITSOUTPUT)
 #define @FITS_OPTION@
-
-// debug build macros (DEBUG or NOT_DEBUG)
-#define @DEBUG_OPTION@
 
 // try/throw/catch C++ exception handling (ENABLE_EXCEPTIONS or DISABLE_EXCEPTIONS)
 // (enabled by default)
