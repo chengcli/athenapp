@@ -46,6 +46,10 @@ file(GLOB src_files
     eos/${EOS_FILE}
     eos/eos_high_order.cpp
     eos/eos_scalars.cpp
+    chemistry/network_wrapper.cpp
+    chemistry/forward_euler.cpp
+    chemistry/utils/*.cpp
+    chem_rad/*.cpp
     fft/*.cpp
     field/*.cpp
     field/field_diffusion/*.cpp
