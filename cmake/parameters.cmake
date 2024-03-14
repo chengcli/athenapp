@@ -62,6 +62,9 @@ SET_IF_EMPTY(IM_RADIATION_ENABLED 0)
 # include cosmic ray transport? default=0 (false)
 SET_IF_EMPTY(CR_ENABLED 0)
 
+# include cosmic ray diffusion? default=0 (false)
+SET_IF_EMPTY(CRDIFFUSION_ENABLED 0)
+
 # enable special or general relativity? default=0 (false)
 SET_IF_EMPTY(RELATIVISTIC_DYNAMICS 0)
 
