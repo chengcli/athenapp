@@ -106,9 +106,26 @@ HydroSourceTerms::HydroSourceTerms(Hydro *phyd, ParameterInput *pin) {
 
   if (SELF_GRAVITY_ENABLED) hydro_sourceterms_defined = true;
 
-  multi_layer_coupling_ = pin->GetOrAddBoolean("hydro",
-    "multi_layer_coupling", false);
-  if (multi_layer_coupling_) hydro_sourceterms_defined = true;
+  // multi-layer shallow water
+  if (std::strcmp(EQUATION_OF_STATE, "shallow_yz") == 0) {
+    multi_layer_coupling_ = pin->GetOrAddBoolean("hydro",
+      "multi_layer_coupling", false);
+    if (multi_layer_coupling_) hydro_sourceterms_defined = true;
+  }
+
+  // coriolis acceleration
+  omega1_ = pin->GetOrAddReal("hydro","coriolis_acc1",0.0);
+  if (omega1_ != 0.0) hydro_sourceterms_defined = true;
+
+  omega2_ = pin->GetOrAddReal("hydro","coriolis_acc2",0.0);
+  if (omega2_ != 0.0) hydro_sourceterms_defined = true;
+
+  omega3_ = pin->GetOrAddReal("hydro","coriolis_acc3",0.0);
+  if (omega3_ != 0.0) hydro_sourceterms_defined = true;
+
+  omegax_ = pin->GetOrAddReal("hydro","OmegaX",0.0);
+  omegay_ = pin->GetOrAddReal("hydro","OmegaY",0.0);
+  omegaz_ = pin->GetOrAddReal("hydro","OmegaZ",0.0);
 
   UserSourceTerm = phyd->pmy_block->pmy_mesh->UserSourceTerm_;
   if (UserSourceTerm != nullptr) hydro_sourceterms_defined = true;
@@ -157,6 +174,14 @@ void HydroSourceTerms::AddSourceTerms(const Real time, const Real dt,
   // MyNewSourceTerms()
   if (multi_layer_coupling_)
     MultiLayerCoupling(dt, flux, prim, cons);
+
+  // coriolis acceleration in the axial direction
+  if (omega1_ != 0.0 || omega2_ != 0.0 || omega3_ != 0.0)
+    Coriolis123(dt, flux, prim, cons);
+
+  // coriolis acceleration in the cartesian direction
+  if (omegax_ != 0.0 || omegay_ != 0.0 || omegaz_ != 0.0)
+    CoriolisXYZ(dt, flux, prim, cons);
 
   //  user-defined source terms
   if (UserSourceTerm != nullptr) {

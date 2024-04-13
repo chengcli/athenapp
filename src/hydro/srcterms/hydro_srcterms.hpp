@@ -62,8 +62,15 @@ class HydroSourceTerms {
   void EnrollSrcTermFunction(SrcTermFunc my_func);
   SrcTermFunc UserSourceTerm;
 
+  // multiple layer shallow water
   void MultiLayerCoupling(const Real dt,const AthenaArray<Real> *flx,
                         const AthenaArray<Real> &prim, AthenaArray<Real> &cons);
+
+  // coriolis acceleration
+  void Coriolis123(const Real dt, const AthenaArray<Real> *flx,
+    const AthenaArray<Real> &prim, AthenaArray<Real> &cons);
+  void CoriolisXYZ(const Real dt, const AthenaArray<Real> *flx,
+    const AthenaArray<Real> &prim, AthenaArray<Real> &cons);
 
  private:
   Hydro *pmy_hydro_;  // ptr to Hydro containing this HydroSourceTerms
@@ -73,6 +80,9 @@ class HydroSourceTerms {
   int  ShBoxCoord_;       // ShearCoordinate type: 1=xy (default), 2=xz
   bool flag_point_mass_;      // flag for calling PointMass function
   int  flag_shearing_source_; // 1=orbital advection, 2=shearing box, 3=rotating system
+  
   bool multi_layer_coupling_; // flag for activate multi-layer coupling
+  Real omega1_, omega2_, omega3_; // constant coriolis acc'n in each direction
+  Real omegax_, omegay_, omegaz_; // coriolis acc'n in cartesian direction
 };
 #endif // HYDRO_SRCTERMS_HYDRO_SRCTERMS_HPP_
