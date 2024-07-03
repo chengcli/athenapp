@@ -130,7 +130,6 @@
 //----------------------------------------------------------------------------------------
 // macros associated with numerical algorithm (rarely modified)
 
-#define NVAPOR @NVAPOR@
 #define NHYDRO @NHYDRO_VARIABLES@
 #define NFIELD @NFIELD_VARIABLES@
 #define NWAVE @NWAVE_VALUE@

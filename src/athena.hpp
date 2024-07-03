@@ -137,12 +137,12 @@ struct EdgeField {
 // explicitly specified enumerator values aare unnecessary, but provided for clarity:
 
 //! array indices for conserved: density, momemtum, total energy
-enum ConsIndex {IDN=0, IM1=1+NVAPOR, IM2=2+NVAPOR, IM3=3+NVAPOR, IEN=4+NVAPOR};
+enum ConsIndex {IDN=0, IM1=NHYDRO-4, IM2=NHYDRO-3, IM3=NHYDRO-2, IEN=NHYDRO-1};
 //! array indices for face-centered field
 enum MagneticIndex {IB1=0, IB2=1, IB3=2};
 
 //! array indices for 1D primitives: velocity, transverse components of field
-enum PrimIndex {IVX=1+NVAPOR, IVY=2+NVAPOR, IVZ=3+NVAPOR, IPR=4+NVAPOR,
+enum PrimIndex {IVX=NHYDRO-4, IVY=NHYDRO-3, IVZ=NHYDRO-2, IPR=NHYDRO-1,
   IBY=(NHYDRO), IBZ=((NHYDRO)+1)};
 
 //! array indices for face-centered electric fields returned by Riemann solver

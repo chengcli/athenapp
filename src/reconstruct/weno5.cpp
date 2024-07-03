@@ -11,7 +11,7 @@ void Reconstruction::Weno5X1(const int k, const int j, const int il, const int i
   AthenaArray<Real> &wl, AthenaArray<Real> &wr)
 {
   MeshBlock *pmb = pmy_block_;
-  for (int n=0; n<=NVAPOR; ++n) {
+  for (int n=0; n<IVX; ++n) {
 #pragma omp simd
     for (int i=il; i<=iu; ++i) {
       Real scale = 0.;
@@ -70,7 +70,7 @@ void Reconstruction::Weno5X2(const int k, const int j, const int il, const int i
   const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
   AthenaArray<Real> &wl, AthenaArray<Real> &wr)
 {
-  for (int n=0; n<=NVAPOR; ++n) {
+  for (int n=0; n<IVX; ++n) {
     for (int i=il; i<=iu; ++i) {
       Real scale = 0.;
       for (int m = -2; m <= 2; ++m) scale += (w(n,k,j+m,i) + 1.E-16)/5.;
@@ -109,7 +109,10 @@ void Reconstruction::Weno5X3(const int k, const int j, const int il, const int i
   const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
   AthenaArray<Real> &wl, AthenaArray<Real> &wr)
 {
-  for (int n=0; n<=NVAPOR; ++n) {
+  auto w_ = w.getTorch();
+  auto wl_ = wl.getTorch();
+
+  for (int n=0; n<IVX; ++n) {
     for (int i=il; i<=iu; ++i) {
       Real scale = 0.;
       for (int m = -2; m <= 2; ++m) scale += (w(n,k+m,j,i) + 1.E-16)/5.;
@@ -132,7 +135,6 @@ void Reconstruction::Weno5X3(const int k, const int j, const int il, const int i
   }
 
   for (int n=IVX; n<NHYDRO; ++n) {
-#pragma omp simd
     for (int i=il; i<=iu; ++i) {
       wl(n,i) = interp_cp5(w(n,k+2,j,i),w(n,k+1,j,i),w(n,k,j,i),w(n,k-1,j,i),w(n,k-2,j,i));
       wr(n,i) = interp_cp5(w(n,k-2,j,i),w(n,k-1,j,i),w(n,k,j,i),w(n,k+1,j,i),w(n,k+2,j,i));
