@@ -109,9 +109,6 @@ void Reconstruction::Weno5X3(const int k, const int j, const int il, const int i
   const AthenaArray<Real> &w, const AthenaArray<Real> &bcc,
   AthenaArray<Real> &wl, AthenaArray<Real> &wr)
 {
-  auto w_ = w.getTorch();
-  auto wl_ = wl.getTorch();
-
   for (int n=0; n<IVX; ++n) {
     for (int i=il; i<=iu; ++i) {
       Real scale = 0.;

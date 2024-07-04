@@ -19,11 +19,12 @@
 // Forward declarations
 class MeshBlock;
 class ParameterInput;
+class Interpolation;
 
 //! \class Reconstruction
 //! \brief member functions implement various spatial reconstruction algorithms
 
-class Reconstruction {
+class Reconstruction final {
  public:
   Reconstruction(MeshBlock *pmb, ParameterInput *pin);
 
@@ -221,6 +222,9 @@ class Reconstruction {
   void Weno5X1(const int k, const int j, const int il, const int iu,
                const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
 
+  void Weno5X1(const int il, const int iu,
+               const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
+
   void Weno5X2(const int k, const int j, const int il, const int iu,
                const AthenaArray<Real> &w, AthenaArray<Real> &wl, AthenaArray<Real> &wr);
 
@@ -246,5 +250,8 @@ class Reconstruction {
   AthenaArray<Real> scr1_in2_, scr2_in2_, scr3_in2_, scr4_in2_;
   AthenaArray<Real> scr1_nn_, scr2_nn_, scr3_nn_, scr4_nn_;
   AthenaArray<Real> scr6_in_, scr7_in_, scr8_in_;
+
+  // interpolation class
+  Interpolation *interp_;
 };
 #endif // RECONSTRUCT_RECONSTRUCTION_HPP_

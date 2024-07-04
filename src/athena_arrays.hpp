@@ -25,6 +25,10 @@
 template<typename T>
 class StrideIterator;
 
+namespace torch {
+class Tensor;
+}
+
 template <typename T>
 class AthenaArray {
  public:
@@ -185,6 +189,9 @@ class AthenaArray {
   StrideIterator<T*> at(int k, int j, int i) const {
     return StrideIterator<T*>(pdata_ + i + nx1_*j + nx1_*nx2_*k, nx1_*nx2_*nx3_);
   }
+
+  // tensor
+  torch::Tensor slice(int64_t dim, int64_t start, int64_t end);
 
  private:
   T *pdata_;
