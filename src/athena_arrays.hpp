@@ -26,12 +26,17 @@
 template<typename T>
 class StrideIterator;
 
+namespace at {
+class Tensor;  // Forward declaration of at::Tensor
+}
+
+
 namespace torch {
-class Tensor;
+  using Tensor = at::Tensor;
 }
 
 namespace c10 {
-enum class DeviceType;
+enum class DeviceType : int8_t;
 }
 
 template <typename T>
@@ -196,12 +201,13 @@ class AthenaArray {
   }
 
   // move data to a device
-  void ToDevice(c10::DeviceType device_type);
+  void toDevice(c10::DeviceType device_type);
 
   // move data from a device
-  void FromDevice();
+  void fromDevice();
 
   // tensor
+  torch::Tensor const& tensor() const;
   torch::Tensor& tensor();
 
  private:
