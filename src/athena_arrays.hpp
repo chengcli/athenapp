@@ -19,6 +19,7 @@
 #include <cstddef>  // size_t
 #include <cstring>  // memset()
 #include <utility>  // swap()
+#include <memory>   // shared_ptr
 
 // Athena++ headers
 
@@ -27,6 +28,10 @@ class StrideIterator;
 
 namespace torch {
 class Tensor;
+}
+
+namespace c10 {
+enum class DeviceType;
 }
 
 template <typename T>
@@ -190,10 +195,17 @@ class AthenaArray {
     return StrideIterator<T*>(pdata_ + i + nx1_*j + nx1_*nx2_*k, nx1_*nx2_*nx3_);
   }
 
+  // move data to a device
+  void ToDevice(c10::DeviceType device_type);
+
+  // move data from a device
+  void FromDevice();
+
   // tensor
-  torch::Tensor slice(int64_t dim, int64_t start, int64_t end);
+  torch::Tensor& tensor();
 
  private:
+  std::shared_ptr<torch::Tensor> ptensor_;
   T *pdata_;
   int nx1_, nx2_, nx3_, nx4_, nx5_, nx6_;
   DataStatus state_;  // describe what "pdata_" points to and ownership of allocated data
