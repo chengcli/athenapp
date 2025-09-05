@@ -115,6 +115,9 @@
 // FITS output (FITSOUTPUT or NO_FITSOUTPUT)
 #define @FITS_OPTION@
 
+// PT output (PTOUTPUT or NO_PTOUTPUT)
+#define @PT_OPTION@
+
 // try/throw/catch C++ exception handling (ENABLE_EXCEPTIONS or DISABLE_EXCEPTIONS)
 // (enabled by default)
 #define @EXCEPTION_HANDLING_OPTION@

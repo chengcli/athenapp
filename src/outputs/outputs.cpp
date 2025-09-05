@@ -247,7 +247,7 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
 
         // set output variable and optional data format string used in formatted writes
         if (op.file_type.compare("hst") != 0 && op.file_type.compare("rst") != 0 &&
-            op.file_type.compare("dbg") != 0) {
+            op.file_type.compare("dbg") != 0 && op.file_type.compare("pt") != 0) {
           op.variable = pin->GetString(op.block_name, "variable");
         }
         op.data_format = pin->GetOrAddString(op.block_name, "data_format", "%12.5e");
@@ -299,6 +299,15 @@ Outputs::Outputs(Mesh *pm, ParameterInput *pin) {
 #else
           msg << "### FATAL ERROR in Outputs constructor" << std::endl
               << "Executable not configured for FITS outputs, but FITS file format "
+              << "is requested in output block '" << op.block_name << "'" << std::endl;
+          ATHENA_ERROR(msg);
+#endif
+        } else if (op.file_type.compare("pt") == 0) {
+#ifdef PTOUTPUT
+          pnew_type = new PTOutput(op);
+#else
+          msg << "### FATAL ERROR in Outputs constructor" << std::endl
+              << "Executable not configured for PT outputs, but PT file format "
               << "is requested in output block '" << op.block_name << "'" << std::endl;
           ATHENA_ERROR(msg);
 #endif

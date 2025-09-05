@@ -48,4 +48,14 @@ class FITSOutput : public OutputType {
   void WriteOutputFile(Mesh *pm, ParameterInput *pin, bool flag) override;
 };
 
+//! \class PTOutput
+//  \brief derived OutputType class for PT dumps
+
+class PTOutput : public OutputType {
+ public:
+  explicit PTOutput(OutputParameters oparams);
+  ~PTOutput() {}
+  void WriteOutputFile(Mesh *pm, ParameterInput *pin, bool flag) override;
+};
+
 #endif  // SRC_OUTPUTS_USER_OUTPUTS_HPP_
